@@ -1,0 +1,17 @@
+.logo img {
+    width: 150px !important;
+    height: auto !important;
+    max-height: none !important;
+}
+
+.logo {
+    width: auto !important;
+    height: auto !important;
+}
+
+.wrap_header {
+    height: 100px !important;
+    /* increase header height */
+    display: flex;
+    align-items: center;
+}
