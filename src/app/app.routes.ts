@@ -4,17 +4,17 @@ import { PartnersMenuComponent } from './partners-menu/partners-menu.component';
 
 export const routes: Routes = [
     {
-        path: '',
+        path: 'partner',
         component: PartnersMenuComponent
     },
 
     {
-        path: 'home',
+        path: '',
         component: HomepageComponent
     },
 
-    {
-        path: '**',
-        redirectTo: 'home'
-    }
+    // {
+    //     path: '**',
+    //     redirectTo: 'home'
+    // }
 ];
