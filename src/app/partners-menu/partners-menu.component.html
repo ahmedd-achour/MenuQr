@@ -30,11 +30,17 @@
         <div class="product-card" *ngFor="let meal of mealdbProducts" [class.synced-card]="meal.isSynced">
 
           <!-- IMAGE AREA: Displays default or customized field override -->
-          <div class="card-image-wrapper">
-            <span class="status-indicator" [class.online]="meal.localData?.visible">
-              {{ meal.localData?.visible !== false ? 'Visible' : 'Hidden' }}
-            </span>
-          </div>
+       <div class="card-image-wrapper">
+  <img
+    [src]="meal.localData?.imageOverride ? meal.localData.imageOverride : meal.strMealThumb"
+    alt="meal.strMeal"
+        class="product-image"
+
+    />
+  <span class="status-indicator" [class.online]="meal.localData?.visible !== false">
+    {{ meal.localData?.visible !== false ? 'Visible' : 'Hidden' }}
+  </span>
+</div>
 
           <!-- DYNAMIC CONTENT VIEW & EDIT MODE MANAGEMENT -->
           <div class="card-body">
@@ -56,6 +62,7 @@
 
             <!-- Partners In-Line Form Edit Mode -->
         <!-- Inside partners-menu.component.html -->
+<!-- Inside partners-menu.component.html -->
 <div *ngIf="editingProductId === meal.idMeal">
   <form [formGroup]="editform" (ngSubmit)="saveProductUpdate(meal)">
 

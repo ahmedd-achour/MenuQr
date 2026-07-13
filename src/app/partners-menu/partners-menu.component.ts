@@ -64,22 +64,42 @@ export class PartnersMenuComponent implements OnInit {
   /**
    * Orchestrates the loading chain for the partner dashboard interface.
    */
-  loadMenuData() {
-    this.http.get<{ categories: any[] }>(`${this.apiBase}/categories.php`).pipe(
-      switchMap(res => {
-        this.categories = res.categories || [];
-        return this.fetchLocalRestaurantProducts();
-      }),
-      switchMap(() => {
-        return this.fetchMealsByCategory(this.selectedCategory);
-      }),
-      catchError(err => {
-        console.error('Error orchestrating menu initialization pipeline:', err);
-        return of(null);
-      })
-    ).subscribe();
-  }
+ loadMenuData() {
+  this.http.get<{ categories: any[] }>(`${this.apiBase}/categories.php`).pipe(
+    switchMap(res => {
+      const rawCategories = res.categories || [];
 
+      // 1. Enforce secure HTTPS paths on the dynamic API assets
+      this.categories = rawCategories.map(cat => {
+        if (cat.strCategoryThumb && cat.strCategoryThumb.startsWith('http://')) {
+          cat.strCategoryThumb = cat.strCategoryThumb.replace('http://', 'https://');
+        }
+        return cat;
+      });
+
+      // 2. Inject a customized Tunisian Coffee category at the top of the list
+      const tunisianCoffeeCategory = {
+        idCategory: 'custom_cafe_tn',
+        strCategory: 'Café & Boissons',
+        strCategoryThumb: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=150', // High-quality fallback image
+        strCategoryDescription: 'Cafés tunisiens traditionnels, Direct, Capucin, et boissons chaudes.'
+      };
+
+      this.categories.unshift(tunisianCoffeeCategory);
+
+      return this.fetchLocalRestaurantProducts();
+    }),
+    switchMap(() => {
+      // 3. Set the initial active view selection to our new Coffee category
+      this.selectedCategory = 'Café & Boissons';
+      return this.fetchMealsByCategory(this.selectedCategory);
+    }),
+    catchError(err => {
+      console.error('Error orchestrating Tunisian localized menu pipeline:', err);
+      return of(null);
+    })
+  ).subscribe();
+}
   /**
    * Simulates loading synchronized restaurant items from the database.
    */
@@ -104,30 +124,54 @@ export class PartnersMenuComponent implements OnInit {
   /**
    * Pulls dynamic category lists from the remote API endpoint and checks sync states.
    */
-  fetchMealsByCategory(category: string): Observable<any[]> {
-    this.selectedCategory = category;
-    return this.http.get<{ meals: any[] }>(`${this.apiBase}/filter.php?c=${category}`).pipe(
-      map(res => {
-        const rawMeals = res.meals || [];
+fetchMealsByCategory(category: string): Observable<any[]> {
+  this.selectedCategory = category;
 
-        // Map and format with local data configurations if overrides exist
-        this.mealdbProducts = rawMeals.map(meal => {
-          const localMatch = this.localDbProducts.get(meal.idMeal);
-          return {
-            ...meal,
-            isSynced: !!localMatch,
-            localData: localMatch || null
-          };
-        });
-        return this.mealdbProducts;
-      }),
-      catchError(err => {
-        console.error(`Failed to gather ingredients/meals for category: ${category}`, err);
-        this.mealdbProducts = [];
-        return of([]);
-      })
-    );
+  // Intercept and return localized Tunisian Coffee items directly
+  if (category === 'Café & Boissons') {
+    const localCoffeeMeals = [
+      { idMeal: 'c_capucin', strMeal: 'Café Capucin Express', strMealThumb: 'https://images.unsplash.com/photo-1534778101976-62847782c213?w=400' },
+      { idMeal: 'c_direct', strMeal: 'Café Direct', strMealThumb: 'https://images.unsplash.com/photo-1570968915860-54d5c301fc9f?w=400' },
+      { idMeal: 'c_turc', strMeal: 'Café Turc (Zahr)', strMealThumb: 'https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=400' },
+      { idMeal: 'c_the', strMeal: 'Thé Vert aux Pignons / Amandes', strMealThumb: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=400' },
+      { idMeal: 'c_express', strMeal: 'Express Allongé', strMealThumb: 'https://images.unsplash.com/photo-1510972527409-ace1dbdfd176?w=400' }
+    ];
+
+    this.mealdbProducts = localCoffeeMeals.map(meal => {
+      const localMatch = this.localDbProducts.get(meal.idMeal);
+      return {
+        ...meal,
+        isSynced: !!localMatch,
+        localData: localMatch || null
+      };
+    });
+
+    return of(this.mealdbProducts);
   }
+
+  // Fallback to standard MealDB API for standard food categories
+  return this.http.get<{ meals: any[] }>(`${this.apiBase}/filter.php?c=${category}`).pipe(
+    map(res => {
+      const rawMeals = res.meals || [];
+      this.mealdbProducts = rawMeals.map(meal => {
+        if (meal.strMealThumb && meal.strMealThumb.startsWith('http://')) {
+          meal.strMealThumb = meal.strMealThumb.replace('http://', 'https://');
+        }
+        const localMatch = this.localDbProducts.get(meal.idMeal);
+        return {
+          ...meal,
+          isSynced: !!localMatch,
+          localData: localMatch || null
+        };
+      });
+      return this.mealdbProducts;
+    }),
+    catchError(() => {
+      this.mealdbProducts = [];
+      return of([]);
+    })
+  );
+}
 
   /**
    * Triggers Form Edit mode state machine, mapping records to view models.
