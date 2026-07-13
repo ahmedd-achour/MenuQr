@@ -1,0 +1,108 @@
+<div class="partners-dashboard">
+  <!-- Top Meta Banner bar representing schema context metadata -->
+  <header class="dashboard-header">
+    <h2>Dynamic Menu Management</h2>
+    <span class="badge active-badge">Restaurant Space ID: {{ currentRestaurantId }}</span>
+  </header>
+
+  <hr class="section-divider" />
+
+  <div class="workspace-layout">
+    <!-- Sidebar: Dynamic Category Fetch Picker -->
+    <aside class="sidebar-categories">
+      <h3>Menu Categories</h3>
+      <ul class="category-list">
+        <li
+          *ngFor="let cat of categories"
+          [class.active]="cat.strCategory === selectedCategory"
+          (click)="fetchMealsByCategory(cat.strCategory).subscribe()">
+          <img [src]="cat.strCategoryThumb" alt="icon" class="cat-icon" />
+          <span>{{ cat.strCategory }}</span>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Workspace Area -->
+    <main class="menu-display-area">
+      <h3>Items under Category: <span class="highlight">{{ selectedCategory }}</span></h3>
+
+      <div class="product-grid">
+        <div class="product-card" *ngFor="let meal of mealdbProducts" [class.synced-card]="meal.isSynced">
+
+          <!-- IMAGE AREA: Displays default or customized field override -->
+          <div class="card-image-wrapper">
+            <span class="status-indicator" [class.online]="meal.localData?.visible">
+              {{ meal.localData?.visible !== false ? 'Visible' : 'Hidden' }}
+            </span>
+          </div>
+
+          <!-- DYNAMIC CONTENT VIEW & EDIT MODE MANAGEMENT -->
+          <div class="card-body">
+            <h4>{{ meal.strMeal }}</h4>
+
+            <!-- Standard View State Mode -->
+            <div *ngIf="editingProductId !== meal.idMeal">
+              <p class="desc-text">
+                {{ meal.localData?.descriptionOverride || 'No custom description set yet. Click Edit to override database fields.' }}
+              </p>
+              <div class="meta-info">
+                <span class="price-tag">{{ meal.localData?.priceVariant || '12.00' }}</span>
+                <span class="order-tag">Sort Order: #{{ meal.localData?.displayOrder || 0 }}</span>
+              </div>
+              <button class="btn btn-primary-outline" (click)="startEdit(meal)">
+                Modify Fields
+              </button>
+            </div>
+
+            <!-- Partners In-Line Form Edit Mode -->
+        <!-- Inside partners-menu.component.html -->
+<div *ngIf="editingProductId === meal.idMeal">
+  <form [formGroup]="editform" (ngSubmit)="saveProductUpdate(meal)">
+
+    <div class="form-group">
+      <label>Display Price (TND) <span class="required-asterisk">* obligatoire</span></label>
+      <input
+        type="number"
+        formControlName="priceVariant"
+        step="0.5"
+        class="form-control"
+        title="Ce champ est obligatoire" />
+    </div>
+
+    <div class="form-group">
+      <label>Custom Description Override <span class="required-asterisk">* obligatoire</span></label>
+      <textarea
+        formControlName="descriptionOverride"
+        rows="2"
+        class="form-control"
+        title="Ce champ est obligatoire"></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Sort Index <span class="required-asterisk">* obligatoire</span></label>
+        <input
+          type="number"
+          formControlName="displayOrder"
+          class="form-control"
+          title="Ce champ est obligatoire" />
+      </div>
+      <div class="form-group check-inline">
+        <input type="checkbox" id="visibleCheck-{{meal.idMeal}}" formControlName="visible" />
+        <label for="visibleCheck-{{meal.idMeal}}">Visible on QR</label>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button type="submit" class="btn btn-save" [disabled]="editform.invalid">Push Changes</button>
+      <button type="button" class="btn btn-cancel" (click)="cancelEdit()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+          </div> <!-- /card-body -->
+        </div> <!-- /product-card -->
+      </div> <!-- /product-grid -->
+    </main>
+  </div>
+</div>
