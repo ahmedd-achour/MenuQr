@@ -1,102 +1,96 @@
 <app-header-partner></app-header-partner>
 
-<div class="admin-panel-container py-5" style="background-color: #fafbfd; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+<div class="admin-panel-container py-5">
   <div class="container">
 
-    <!-- Toast Feedback System -->
-    <div *ngIf="notificationMessage" class="alert-toast shadow bo-rad-12 p-3 mb-4 d-flex align-items-center justify-content-between"
-         [ngClass]="isError ? 'toast-err' : 'toast-success'" style="animation: slideDown 0.4s ease forwards;">
+    <!-- Dynamic Feedback System -->
+    <div *ngIf="notificationMessage"
+         class="alert-toast shadow p-3 mb-4 d-flex align-items-center justify-content-between"
+         [ngClass]="isError ? 'toast-err' : 'toast-success'">
       <div class="d-flex align-items-center">
-        <i class="fa mr-3" [ngClass]="isError ? 'fa-exclamation-triangle' : 'fa-check-circle'" style="font-size: 20px;"></i>
+        <i class="fa mr-3" [ngClass]="isError ? 'fa-exclamation-triangle' : 'fa-check-circle'"></i>
         <span class="font-weight-bold">{{ notificationMessage }}</span>
       </div>
-      <button type="button" class="btn-close" (click)="notificationMessage = ''" style="border: none; background: transparent; color: inherit;">.</button>
+      <button type="button" class="btn-close" (click)="notificationMessage = ''" aria-label="Close"></button>
     </div>
 
-    <!-- Minimalist Page Header -->
+    <!-- Header Panel Actions -->
     <div class="row align-items-center mb-5">
       <div class="col-md-8">
         <div class="d-flex align-items-center gap-3 flex-wrap">
-          <h1 style="font-size: 32px; font-weight: 800; color: #0f172a; letter-spacing: -0.8px; margin: 0;">
-            Tableau de bord
-          </h1>
-          <span class="status-badge m-l-12" [ngClass]="restaurantData.status === 'active' ? 'status-active' : 'status-trial'">
+          <h1 class="dashboard-title">{{ restaurantData.businessName || 'Mon Restaurant' }}</h1>
+          <span class="status-badge" [ngClass]="restaurantData.status === 'active' ? 'status-active' : 'status-trial'">
             {{ restaurantData.status === 'trial' ? 'Essai' : 'Actif' }}
           </span>
         </div>
-        <p class="text-muted mt-2 mb-0" style="font-size: 15px;">
-          Gérez l'identité visuelle de votre établissement et les configurations globales en temps réel.
+        <p class="text-muted mt-2 mb-0">
+          Gérez l'identité visuelle de votre établissement et les configurations de votre profil.
         </p>
       </div>
       <div class="col-md-4 text-md-end mt-3 mt-md-0">
-        <button type="button" (click)="onSave()" [disabled]="isSaving || !settingsForm.valid" class="btn-save-changes trans-0-4">
+        <!-- Direct Form Action Trigger -->
+        <button type="button" (click)="onSave()" [disabled]="isSaving || !settingsForm.valid" class="btn-save-changes">
           <span *ngIf="!isSaving"><i class="fa fa-save mr-2"></i> Sauvegarder</span>
-          <span *ngIf="isSaving"><i class="fa fa-spinner fa-spin mr-2"></i> Synchronisation...</span>
+          <span *ngIf="isSaving"><i class="fa fa-spinner fa-spin mr-2"></i> Enregistrement...</span>
         </button>
       </div>
     </div>
 
+    <!-- Main Grid Workspace -->
     <form #settingsForm="ngForm" (ngSubmit)="onSave()" class="row g-4">
 
-      <!-- LEFT COLUMN: Live Visual Identity Preview Card -->
+      <!-- Left Column: Unified Interactive Branding Cards & Profile Status -->
       <div class="col-lg-4">
-        <div class="dashboard-card branding-preview-card shadow-sm border-0 h-100 p-0 overflow-hidden">
+        <div class="dashboard-card shadow-sm h-100 p-0 overflow-hidden">
 
-          <!-- Cover Image Upload Area -->
+          <!-- Interactive Cover Photo Mockup Wrapper -->
           <div class="preview-cover-banner"
                [style.backgroundImage]="'url(' + (restaurantData.coverImage || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800') + ')'">
 
-            <div class="uploader-overlay flex-col-c-m">
-              <i class="fa fa-camera" style="font-size: 22px; color: #fff;"></i>
+            <div class="uploader-overlay">
+              <i class="fa fa-camera"></i>
               <span class="upload-indicator-text mt-2">Modifier la couverture</span>
-              <input type="file" (change)="uploadMedia($event, 'coverImage')" accept="image/*" class="hidden-file-input" title="jk">
+              <input type="file" (change)="uploadMedia($event, 'coverImage')" accept="image/*" class="hidden-file-input" title="Modifier la couverture">
             </div>
 
-            <!-- Overlapping Circular Logo Upload Area -->
+            <!-- Overlapping Interactive Logo Mockup Wrapper -->
             <div class="preview-logo-wrapper"
                  [style.backgroundImage]="'url(' + (restaurantData.logo || 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=200') + ')'">
-              <div class="uploader-overlay flex-col-c-m rounded-circle">
-                <i class="fa fa-pencil" style="font-size: 16px; color: #fff;"></i>
-                <input title="j" type="file" (change)="uploadMedia($event, 'logo')" accept="image/*" class="hidden-file-input">
+              <div class="uploader-overlay rounded-circle">
+                <i class="fa fa-pencil"></i>
+                <input type="file" (change)="uploadMedia($event, 'logo')" accept="image/*" class="hidden-file-input" title="Modifier le logo">
               </div>
             </div>
 
           </div>
 
-          <!-- Quick Preview Context Area -->
+          <!-- Quick Owner Meta Information Block -->
           <div class="p-4 text-center mt-5">
-            <h4 style="font-weight: 800; color: #0f172a; margin-bottom: 4px;">
-              {{ restaurantData.businessName || 'Nom de votre établissement' }}
-            </h4>
-            <p class="text-muted mb-4" style="font-size: 13px;">
-              <i class="fa fa-map-marker mr-1 text-primary"></i> {{ restaurantData.city || 'Ville' }}, Tunisie
-            </p>
+            <h4 class="brand-title">{{ restaurantData.businessName || 'Nom de l\'établissement' }}</h4>
+            <p class="text-muted mb-4"><i class="fa fa-map-marker mr-1 text-primary"></i> {{ restaurantData.city || 'Tunis' }}</p>
 
-            <hr style="border-color: #f1f5f9;">
+            <hr class="divider">
 
-            <!-- User Context (Dynamic Account Summary Info Fields) -->
             <div class="text-start px-2 mt-4" *ngIf="userProfile">
-              <h6 class="text-uppercase font-weight-bold text-muted mb-3" style="font-size: 11px; letter-spacing: 1px;">
-                Propriétaire du compte
-              </h6>
+              <h6 class="meta-section-title">Informations Administrateur</h6>
 
               <div class="d-flex align-items-center mb-3">
-                <div class="avatar-icon mr-3">
+                <div class="meta-icon mr-3">
                   <i class="fa fa-user"></i>
                 </div>
                 <div>
-                  <span class="d-block text-muted" style="font-size: 11px;">Nom complet</span>
-                  <strong style="font-size: 14px; color: #1e293b;">{{ userProfile.fullName || 'Utilisateur' }}</strong>
+                  <span class="d-block text-muted small">Nom du compte</span>
+                  <strong class="text-dark">{{ userProfile.fullName || 'Administrateur' }}</strong>
                 </div>
               </div>
 
-              <div class="d-flex align-items-center mb-1">
-                <div class="avatar-icon mr-3">
+              <div class="d-flex align-items-center">
+                <div class="meta-icon mr-3">
                   <i class="fa fa-envelope"></i>
                 </div>
                 <div class="w-100 overflow-hidden">
-                  <span class="d-block text-muted" style="font-size: 11px;">Adresse e-mail</span>
-                  <strong class="d-block text-truncate" style="font-size: 14px; color: #1e293b;">{{ userProfile.email }}</strong>
+                  <span class="d-block text-muted small">Adresse de contact</span>
+                  <strong class="text-dark d-block text-truncate">{{ userProfile.email }}</strong>
                 </div>
               </div>
             </div>
@@ -105,88 +99,84 @@
         </div>
       </div>
 
-      <!-- RIGHT COLUMN: Premium SaaS Form Details -->
+      <!-- Right Column: Settings Inputs for User Profile & Restaurant documents -->
       <div class="col-lg-8">
-        <div class="dashboard-card shadow-sm border-0 p-4 p-md-5">
+        <div class="dashboard-card shadow-sm p-4 p-md-5">
 
-          <!-- Section 1: User Profile Settings -->
-          <div class="mb-5">
+          <!-- Group 1: User Profile Settings (Saves directly to Users collection) -->
+          <div class="mb-5" *ngIf="userProfile">
             <div class="d-flex align-items-center mb-4">
               <div class="step-num mr-3">1</div>
-              <h4 class="m-0" style="font-weight: 800; color: #0f172a; font-size: 18px;">Informations Personnelles</h4>
+              <h4 class="form-group-title">Coordonnées du Profil</h4>
             </div>
 
-            <div class="row g-3" *ngIf="userProfile">
+            <div class="row g-3">
               <div class="col-md-6 mb-3">
-                <label class="form-label font-weight-bold">Nom & Prénom</label>
+                <label class="form-label">Nom Complet</label>
                 <div class="input-group">
-                  <span class="input-group-text bg-light border-0"><i class="fa fa-user text-muted"></i></span>
-                  <input type="text" class="form-control custom-input" [(ngModel)]="userProfile.fullName" name="fullName" placeholder="Entrez votre nom complet" required>
+                  <span class="input-group-text"><i class="fa fa-user"></i></span>
+                  <input type="text" class="form-control custom-input" [(ngModel)]="userProfile.fullName" name="fullName" placeholder="Votre nom" required>
                 </div>
               </div>
 
               <div class="col-md-6 mb-3">
-                <label class="form-label font-weight-bold">Statut du Profil</label>
+                <label class="form-label">Statut du Compte</label>
                 <div class="input-group">
-                  <span class="input-group-text bg-light border-0"><i class="fa fa-shield text-muted"></i></span>
-                  <input type="text" class="form-control custom-input" [(ngModel)]="userProfile.status" name="userStatus" placeholder="Statut du compte" required>
+                  <span class="input-group-text"><i class="fa fa-shield"></i></span>
+                  <input type="text" class="form-control custom-input" [(ngModel)]="userProfile.status" name="userStatus" placeholder="Statut" required>
                 </div>
               </div>
             </div>
           </div>
 
-          <hr style="border-color: #f1f5f9;" class="my-4">
+          <hr class="divider mb-5">
 
-          <!-- Section 2: Restaurant Settings -->
+          <!-- Group 2: Restaurant Settings (Saves to Restaurants collection) -->
           <div>
             <div class="d-flex align-items-center mb-4">
               <div class="step-num mr-3">2</div>
-              <h4 class="m-0" style="font-weight: 800; color: #0f172a; font-size: 18px;">Configurations de l'établissement</h4>
+              <h4 class="form-group-title">Détails de l'Établissement</h4>
             </div>
 
             <div class="row g-3">
               <div class="col-12 mb-3">
-                <label class="form-label font-weight-bold">Nom commercial</label>
-                <input type="text" class="form-control custom-input" [(ngModel)]="restaurantData.businessName" name="businessName" placeholder="Ex: Vintage Coffee House" required>
+                <label class="form-label">Nom commercial de l'établissement</label>
+                <input type="text" class="form-control custom-input" [(ngModel)]="restaurantData.businessName" name="businessName" placeholder="Ex: Shnell Food & Coffee" required>
               </div>
 
               <div class="col-md-6 mb-3">
-                <label class="form-label font-weight-bold">Adresse physique</label>
-                <input type="text" class="form-control custom-input" [(ngModel)]="restaurantData.address" name="address" placeholder="Ex: Berges du Lac 2">
+                <label class="form-label">Adresse Physique</label>
+                <input type="text" class="form-control custom-input" [(ngModel)]="restaurantData.address" name="address" placeholder="Ex: Avenue Hédi Nouira">
               </div>
 
               <div class="col-md-6 mb-3">
-                <label class="form-label font-weight-bold">Ville</label>
+                <label class="form-label">Ville</label>
                 <input type="text" class="form-control custom-input" [(ngModel)]="restaurantData.city" name="city" placeholder="Ex: Tunis">
               </div>
 
               <div class="col-md-6 mb-3">
-                <label class="form-label font-weight-bold">Devise active</label>
-                <div class="position-relative">
-                  <select class="form-select custom-input" [(ngModel)]="restaurantData.currency" name="currency" title="currency">
-                    <option value="TND">🇹🇳 Dinar Tunisien (TND)</option>
-                    <option value="USD">🇺🇸 Dollar Américain (USD)</option>
-                    <option value="EUR">🇪🇺 Euro (EUR)</option>
-                    <option value="DZD">🇩🇿 Dinar Algérien (DZD)</option>
-                    <option value="MAD">🇲🇦 Dirham Marocain (MAD)</option>
-                  </select>
-                </div>
+                <label class="form-label">Devise de transaction</label>
+                <select class="form-select custom-input" [(ngModel)]="restaurantData.currency" name="currency" title="Devise">
+                  <option value="TND">🇹🇳 Dinar Tunisien (TND)</option>
+                  <option value="USD">🇺🇸 Dollar Américain (USD)</option>
+                  <option value="EUR">🇪🇺 Euro (EUR)</option>
+                  <option value="DZD">🇩🇿 Dinar Algérien (DZD)</option>
+                  <option value="MAD">🇲🇦 Dirham Marocain (MAD)</option>
+                </select>
               </div>
 
               <div class="col-md-6 mb-3">
-                <label class="form-label font-weight-bold">Langue par défaut du menu</label>
-                <div class="position-relative">
-                  <select class="form-select custom-input" [(ngModel)]="restaurantData.language" name="language" title="language">
-                    <option value="fr">🇫🇷 Français</option>
-                    <option value="ar">🇹🇳 العربية (Arabe)</option>
-                    <option value="en">🇬🇧 English</option>
-                  </select>
-                </div>
+                <label class="form-label">Langue d'Affichage</label>
+                <select class="form-select custom-input" [(ngModel)]="restaurantData.language" name="language" title="Langue">
+                  <option value="fr">Français</option>
+                  <option value="ar">العربية (Arabe)</option>
+                  <option value="en">English</option>
+                </select>
               </div>
 
               <div class="col-12 mb-3">
-                <label class="form-label font-weight-bold">Description de l'établissement</label>
-                <textarea class="form-control custom-textarea" rows="4" [(ngModel)]="restaurantData.description" name="description" placeholder="Décrivez votre concept, votre ambiance, spécialités culinaires..."></textarea>
+                <label class="form-label">Description / Bio</label>
+                <textarea class="form-control custom-textarea" rows="4" [(ngModel)]="restaurantData.description" name="description" placeholder="Présentez votre établissement en quelques mots..."></textarea>
               </div>
             </div>
           </div>
