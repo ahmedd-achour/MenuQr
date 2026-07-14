@@ -1,0 +1,261 @@
+/* Dashboard Cards Layout */
+.dashboard-card {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  border: 1px solid #eaeaea;
+  transition: box-shadow 0.3s ease;
+}
+
+.dashboard-card:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+}
+
+.card-heading {
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #111;
+}
+
+/* Beautiful Inputs styling */
+.input-label {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #495057;
+  display: block;
+}
+
+.input-field-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.custom-input {
+  width: 100%;
+  height: 52px;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  background-color: #f8fafc;
+  padding: 0 20px 0 20px;
+  font-size: 15px;
+  color: #1e293b;
+  font-family: inherit;
+  transition: all 0.2s ease-in-out;
+}
+
+.custom-textarea {
+  width: 100%;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  background-color: #f8fafc;
+  padding: 15px 20px;
+  font-size: 15px;
+  color: #1e293b;
+  font-family: inherit;
+  resize: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.custom-input:focus, .custom-textarea:focus {
+  border-color: #111111;
+  background-color: #ffffff;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.05);
+}
+
+/* Clean Select inputs wrapper */
+.select-field-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.custom-select {
+  width: 100%;
+  height: 52px;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  background-color: #f8fafc;
+  padding-left: 20px;
+  padding-right: 40px;
+  font-size: 15px;
+  color: #1e293b;
+  font-family: inherit;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.custom-select:focus {
+  border-color: #111111;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.05);
+}
+
+.select-chevron {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #64748b;
+  font-size: 12px;
+}
+
+/* Action button styling */
+.save-btn {
+  background-color: #111111;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 28px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+
+.save-btn:hover {
+  background-color: #2a2a2a;
+  transform: translateY(-2px);
+}
+
+.save-btn:disabled {
+  background-color: #cbd5e1;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Status Badges */
+.status-badge {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 20px;
+}
+
+.status-active {
+  background-color: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.status-trial {
+  background-color: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
+
+/* Interactive Brand Preview Mockup Card */
+.brand-preview-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.preview-cover-banner {
+  height: 160px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.preview-logo-wrapper {
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  border: 4px solid #ffffff;
+  background-size: cover;
+  background-position: center;
+  position: absolute;
+  bottom: -43px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* Elegant file input trigger on hover */
+.uploader-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.65);
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.preview-cover-banner:hover .uploader-overlay,
+.preview-logo-wrapper:hover .uploader-overlay {
+  opacity: 1;
+}
+
+.upload-indicator-text {
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.hidden-file-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.preview-badge-status {
+  display: inline-block;
+  background-color: #f1f5f9;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 12px;
+}
+
+.bg-light-panel {
+  background-color: #f8fafc;
+}
+
+/* Beautiful Toast banners */
+.alert-toast {
+  border-radius: 12px;
+  border: 1px solid;
+}
+
+.toast-success {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border-color: #a7f3d0;
+}
+
+.toast-err {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border-color: #fca5a5;
+}

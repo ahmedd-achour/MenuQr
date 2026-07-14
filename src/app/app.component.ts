@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, Router } from '@angular/router';
 import { HomepageComponent } from './homepage/homepage.component';
 
 import { Firestore, doc, setDoc } from '@angular/fire/firestore';
@@ -15,7 +15,11 @@ import { HeaderComponent } from './header/header.component';
 })
 export class AppComponent {
 
-  constructor(private firestore: Firestore) {}
+  constructor(private firestore: Firestore, public router: Router) {}
+
+  isAdminRoute(): boolean {
+    return this.router.url.includes('/admin-panel');
+  }
 
   async writeTest() {
     try {

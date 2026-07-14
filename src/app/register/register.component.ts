@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from '@angular/fire/auth';
@@ -8,7 +8,7 @@ import { Firestore, doc, setDoc, updateDoc, collection } from '@angular/fire/fir
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule , RouterModule],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css'
 })
