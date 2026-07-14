@@ -3,11 +3,13 @@ import { RouterOutlet } from '@angular/router';
 import { HomepageComponent } from './homepage/homepage.component';
 
 import { Firestore, doc, setDoc } from '@angular/fire/firestore';
+import { FooterComponent } from './footer/footer.component';
+import { HeaderComponent } from './header/header.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, HomepageComponent],
+  imports: [RouterOutlet, HomepageComponent , FooterComponent , HeaderComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
