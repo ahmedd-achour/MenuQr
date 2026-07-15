@@ -4,7 +4,7 @@
 			<div class="wrap_header trans-0-3">
 				<!-- Logo -->
 				<div class="logo">
-					<a href="index.html">
+					<a [routerLink]="['/admin-panel', userId]">
 						<img src="../../assets/logo.png" alt="IMG-LOGO" data-logofixed="../../assets/logo.png">
 					</a>
 				</div>
@@ -14,12 +14,12 @@
 					<nav class="menu">
 						<ul class="main_menu">
 							<li>
-								<a href="/dashboard">Dashboard</a>
+								<a [routerLink]="['/admin-panel', userId]">Dashboard</a>
 							</li>
 
 							<li>
-								<a href="/menu">My-Menu</a>
-					</li>
+								<a [routerLink]="['/admin-panel', userId, 'menu']">My-Menu</a>
+							</li>
 
           <!--
 
@@ -32,11 +32,11 @@
 
 
 							<li>
-								<a href="/qr-code">QR-Design</a>
+								<a [routerLink]="['/admin-panel', userId, 'qr-code']">QR-Design</a>
 							</li>
 
 							<li>
-								<a href="/auth">Auth</a>
+								<a [routerLink]="['/register']">Logout</a>
 							</li>
 						</ul>
 					</nav>

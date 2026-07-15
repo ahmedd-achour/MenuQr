@@ -1,115 +1,178 @@
-<div class="partners-dashboard">
-  <!-- Top Meta Banner bar representing schema context metadata -->
-  <header class="dashboard-header">
-    <h2>Dynamic Menu Management</h2>
-    <span class="badge active-badge">Restaurant Space ID: {{ currentRestaurantId }}</span>
+<app-header-partner [userId]="userId"></app-header-partner>
+<div class="partners-dashboard container-fluid p-t-30 p-b-50">
+  <header class="dashboard-header d-flex justify-content-between align-items-center m-b-30 bg-white p-3 bo-rad-10 shadow-sm">
+    <h2 style="font-weight: 700; color: #111827; margin: 0; font-size: 1.5rem;">Dynamic Menu Management</h2>
+    <span class="badge active-badge" style="font-size: 13px; font-weight: 600; color: #4b5563; background-color: #f3f4f6; border: 1px solid #e5e7eb; padding: 6px 12px; border-radius: 6px;">
+      Restaurant Space ID: {{ currentRestaurantId }}
+    </span>
   </header>
 
-  <hr class="section-divider" />
-
-  <div class="workspace-layout">
-    <!-- Sidebar: Dynamic Category Fetch Picker -->
-    <aside class="sidebar-categories">
-      <h3>Menu Categories</h3>
-      <ul class="category-list">
-        <li
-          *ngFor="let cat of categories"
-          [class.active]="cat.strCategory === selectedCategory"
-          (click)="fetchMealsByCategory(cat.strCategory).subscribe()">
-          <img [src]="cat.strCategoryThumb" alt="icon" class="cat-icon" />
-          <span>{{ cat.strCategory }}</span>
-        </li>
-      </ul>
+  <div class="row">
+    <!-- Sidebar Categories Column -->
+    <aside class="col-lg-3 col-md-4 col-sm-12 m-b-30">
+      <div class="sidebar-categories card border-0 shadow-sm p-4 bo-rad-10 bg-white">
+        <h3 class="txt10 text-uppercase m-b-20" style="font-size: 12px; font-weight: 700; color: #9ca3af; letter-spacing: 1px;">Menu Categories</h3>
+        <ul class="category-list list-unstyled" style="margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px;">
+          <li
+            *ngFor="let cat of categories"
+            [class.active]="cat.strCategory === selectedCategory"
+            (click)="fetchMealsByCategory(cat.strCategory).subscribe()"
+            class="d-flex align-items-center gap-3 p-2 bo-rad-8 cursor-pointer trans-0-3"
+            style="border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+            [style.backgroundColor]="cat.strCategory === selectedCategory ? '#0284c7' : 'transparent'"
+            [style.color]="cat.strCategory === selectedCategory ? '#ffffff' : '#4b5563'"
+            onmouseover="this.style.backgroundColor=this.getAttribute('data-active')==='true'?'#0284c7':'#f3f4f6'; this.style.color=this.getAttribute('data-active')==='true'?'#ffffff':'#111827';"
+            onmouseout="this.style.backgroundColor=this.getAttribute('data-active')==='true'?'#0284c7':'transparent'; this.style.color=this.getAttribute('data-active')==='true'?'#ffffff':'#4b5563';"
+            [attr.data-active]="cat.strCategory === selectedCategory"
+          >
+            <img [src]="cat.strCategoryThumb" alt="icon" class="cat-icon bo-rad-6" style="width: 32px; height: 32px; object-fit: cover; border-radius: 6px; border: 1px solid #e5e7eb;" />
+            <span style="font-weight: 600; font-size: 14px;">{{ cat.strCategory }}</span>
+          </li>
+        </ul>
+      </div>
     </aside>
 
-    <!-- Main Content Workspace Area -->
-    <main class="menu-display-area">
-      <h3>Items under Category: <span class="highlight">{{ selectedCategory }}</span></h3>
+    <!-- Menu Display Area Column -->
+    <main class="col-lg-9 col-md-8 col-sm-12">
+      <div class="card border-0 shadow-sm p-4 bo-rad-10 bg-white m-b-30">
+        <h3 class="m-b-30" style="font-weight: 700; color: #111827; font-size: 20px;">
+          Items under Category: <span class="highlight" style="color: #0284c7;">{{ selectedCategory }}</span>
+        </h3>
 
-      <div class="product-grid">
-        <div class="product-card" *ngFor="let meal of mealdbProducts" [class.synced-card]="meal.isSynced">
-
-          <!-- IMAGE AREA: Displays default or customized field override -->
-       <div class="card-image-wrapper">
-  <img
-    [src]="meal.localData?.imageOverride ? meal.localData.imageOverride : meal.strMealThumb"
-    alt="meal.strMeal"
-        class="product-image"
-
-    />
-  <span class="status-indicator" [class.online]="meal.localData?.visible !== false">
-    {{ meal.localData?.visible !== false ? 'Visible' : 'Hidden' }}
-  </span>
-</div>
-
-          <!-- DYNAMIC CONTENT VIEW & EDIT MODE MANAGEMENT -->
-          <div class="card-body">
-            <h4>{{ meal.strMeal }}</h4>
-
-            <!-- Standard View State Mode -->
-            <div *ngIf="editingProductId !== meal.idMeal">
-              <p class="desc-text">
-                {{ meal.localData?.descriptionOverride || 'No custom description set yet. Click Edit to override database fields.' }}
-              </p>
-              <div class="meta-info">
-                <span class="price-tag">{{ meal.localData?.priceVariant || '12.00' }}</span>
-                <span class="order-tag">Sort Order: #{{ meal.localData?.displayOrder || 0 }}</span>
+        <div class="row">
+          <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 p-b-30" *ngFor="let meal of mealdbProducts">
+            <!-- Block1 style from Homepage with premium details and options -->
+            <div class="blo1 bg-white bo-rad-10 overflow-hidden border trans-0-4 h-100 d-flex flex-column" 
+                 [style.borderColor]="meal.isSynced ? '#10b981' : '#e5e7eb'"
+                 [style.boxShadow]="meal.isSynced ? '0 4px 6px -1px rgba(16, 185, 129, 0.1), 0 2px 4px -1px rgba(16, 185, 129, 0.06)' : '0 1px 3px rgba(0, 0, 0, 0.05)'"
+                 [style.opacity]="meal.isSynced ? '1' : '0.85'">
+              
+              <!-- Badge display on image container -->
+              <div class="wrap-pic-blo1 bo-rad-10 hov-img-zoom pos-relative overflow-hidden" style="height: 180px;">
+                <img [src]="meal.localData?.imageOverride ? meal.localData.imageOverride : meal.strMealThumb" 
+                     [alt]="meal.strMeal" 
+                     style="width: 100%; height: 100%; object-fit: cover; transition: all 0.4s ease;">
+                
+                <span class="badge position-absolute" 
+                      [class.bg-success]="meal.isSynced" 
+                      [class.bg-secondary]="!meal.isSynced" 
+                      style="top: 12px; right: 12px; z-index: 10; font-size: 10px; padding: 4px 8px; border-radius: 4px; font-weight: 700; color: #ffffff;">
+                  {{ meal.isSynced ? 'Added to Menu' : 'Available to Add' }}
+                </span>
+                <span *ngIf="meal.isSynced" class="badge position-absolute" 
+                      [class.bg-info]="meal.localData?.visible" 
+                      [class.bg-warning]="!meal.localData?.visible" 
+                      style="top: 12px; left: 12px; z-index: 10; font-size: 10px; padding: 4px 8px; border-radius: 4px; font-weight: 700; color: #ffffff;">
+                  {{ meal.localData?.visible ? 'Visible' : 'Hidden' }}
+                </span>
               </div>
-              <button class="btn btn-primary-outline" (click)="startEdit(meal)">
-                Modify Fields
-              </button>
+
+              <!-- Content and interactions -->
+              <div class="wrap-text-blo1 p-t-20 p-b-20 p-l-20 p-r-20 d-flex flex-column flex-grow-1">
+                <h4 class="txt5 color0-hov trans-0-4 m-b-10" style="font-weight: 700; font-size: 16px; color: #1e293b;">
+                  {{ meal.strMeal }}
+                </h4>
+                
+                <p class="m-b-15" style="font-size: 13px; color: #64748b; line-height: 1.5; min-height: 38px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                  {{ meal.localData?.descriptionOverride || meal.description || 'Standard preparation of freshly sourced ' + meal.strMeal + '.' }}
+                </p>
+
+                <!-- Metadata block -->
+                <div class="meta-info-block m-b-15 p-t-15" style="border-top: 1px dashed #e2e8f0; margin-top: auto;">
+                  <div class="d-flex align-items-center justify-content-between small text-muted m-b-8">
+                    <span>Display Sort Order:</span>
+                    <span class="badge bg-light text-dark font-weight-bold" style="padding: 2px 6px; border-radius: 4px; font-size: 11px;">#{{ meal.localData?.displayOrder || 0 }}</span>
+                  </div>
+                  
+                  <div class="d-flex flex-column gap-1">
+                    <span style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Sizes & Prices:</span>
+                    
+                    <!-- Non-synced default state -->
+                    <div *ngIf="!meal.isSynced" class="d-flex justify-content-between bg-light px-2 py-1 rounded small border text-muted" style="font-size: 12px;">
+                      <span>Standard (Default)</span>
+                      <span class="font-weight-bold text-dark">12.00 TND</span>
+                    </div>
+                    
+                    <!-- Synced customized pricing options -->
+                    <ng-container *ngIf="meal.isSynced">
+                      <div *ngIf="getSavedOptionsForProduct(meal.idMeal).length === 0" class="d-flex justify-content-between bg-light px-2 py-1 rounded small border" style="font-size: 12px;">
+                        <span class="text-dark font-weight-medium">Standard</span>
+                        <span class="text-primary font-weight-bold">{{ (meal.localData?.priceVariant || 12.00) | number:'1.2-2' }} TND</span>
+                      </div>
+                      <div *ngFor="let opt of getSavedOptionsForProduct(meal.idMeal)" class="d-flex align-items-center justify-content-between bg-light px-2 py-1 rounded small border" style="font-size: 12px;">
+                        <span class="text-dark font-weight-medium">{{ opt.size }}</span>
+                        <span class="text-primary font-weight-bold">{{ opt.price | number:'1.2-2' }} TND</span>
+                      </div>
+                    </ng-container>
+                  </div>
+                </div>
+
+                <!-- Standard Display Mode Actions -->
+                <div *ngIf="editingProductId !== meal.idMeal" class="action-buttons-group d-flex gap-2">
+                  <button *ngIf="!meal.isSynced" class="btn btn-save w-100 d-flex align-items-center justify-content-center gap-2" (click)="startEdit(meal)" style="border-radius: 6px; padding: 8px 12px; font-size: 13px; font-weight: 600;">
+                    <i class="fa fa-plus-circle"></i> Add to Menu
+                  </button>
+                  <ng-container *ngIf="meal.isSynced">
+                    <button class="btn btn-primary-outline flex-grow-1 d-flex align-items-center justify-content-center gap-2" (click)="startEdit(meal)" style="border-radius: 6px; padding: 8px 12px; font-size: 13px; font-weight: 600;">
+                      <i class="fa fa-pencil"></i> Configure
+                    </button>
+                    <button class="btn btn-outline-danger" (click)="removeProduct(meal)" style="border: 1px solid #fca5a5; background: #fff; color: #ef4444; width: 38px; display: flex; align-items: center; justify-content: center; padding: 0; border-radius: 6px; transition: all 0.2s;" onmouseover="this.style.backgroundColor='#fee2e2'" onmouseout="this.style.backgroundColor='#ffffff'" title="Remove from Menu">
+                      <i class="fa fa-trash"></i>
+                    </button>
+                  </ng-container>
+                </div>
+
+                <!-- Partners In-Line Form Edit Mode -->
+                <div *ngIf="editingProductId === meal.idMeal" class="edit-form-wrapper p-t-15 m-t-15" style="border-top: 1px solid #f3f4f6;">
+                  <form [formGroup]="editform" (ngSubmit)="saveProductUpdate(meal)">
+                    
+                    <div class="form-group m-b-12">
+                      <label class="form-label text-uppercase font-weight-bold text-muted" style="font-size: 10px; margin-bottom: 4px;">Description Override</label>
+                      <textarea formControlName="descriptionOverride" rows="2" class="form-control" title="Description override" style="font-size: 12px; line-height: 1.4; border-radius: 6px; padding: 6px 10px;" required></textarea>
+                    </div>
+
+                    <!-- Sizes & Prices Editor -->
+                    <div class="form-group m-b-12">
+                      <label class="form-label text-uppercase font-weight-bold text-muted m-b-6" style="font-size: 10px;">Tailles et Tarifs</label>
+                      <div *ngFor="let size of meal.defaultSizes" class="variant-row d-flex align-items-center justify-content-between p-2 m-b-6 rounded bg-light border gap-2">
+                        <div class="form-check form-switch d-flex align-items-center mb-0 gap-2">
+                          <input class="form-check-input" type="checkbox" [id]="'opt-active-' + meal.idMeal + '-' + size" [(ngModel)]="sizesConfig[size].available" [ngModelOptions]="{ standalone: true }" style="width: 32px; height: 16px; cursor: pointer; margin: 0;">
+                          <label class="form-check-label font-weight-bold mb-0 text-dark" [for]="'opt-active-' + meal.idMeal + '-' + size" style="cursor: pointer; min-width: 50px; font-size: 11px; margin: 0;">{{ size }}</label>
+                        </div>
+                        <div class="d-flex align-items-center gap-1">
+                          <input type="number" step="0.5" min="0.1" class="form-control form-control-sm text-end" [(ngModel)]="sizesConfig[size].price" [ngModelOptions]="{ standalone: true }" style="max-width: 65px; height: 26px; border-radius: 4px; padding: 2px 6px; font-size: 11px;" [disabled]="!sizesConfig[size].available" required>
+                          <span class="text-muted" style="font-size: 10px;">TND</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="form-row m-b-15 d-flex gap-2">
+                      <div class="form-group mb-0 flex-grow-1">
+                        <label class="form-label text-uppercase font-weight-bold text-muted" style="font-size: 10px; margin-bottom: 4px;">Sort Order</label>
+                        <input type="number" formControlName="displayOrder" class="form-control" title="Sort Index" style="height: 30px; font-size: 12px; padding: 4px 8px; border-radius: 4px;" required />
+                      </div>
+                      <div class="form-group mb-0 d-flex align-items-center gap-2" style="padding-top: 18px;">
+                        <input type="checkbox" id="visibleCheck-{{meal.idMeal}}" formControlName="visible" style="width: 16px; height: 16px; accent-color: #0284c7; cursor: pointer;" />
+                        <label for="visibleCheck-{{meal.idMeal}}" class="mb-0 font-weight-bold text-dark" style="cursor: pointer; font-size: 12px;">Visible</label>
+                      </div>
+                    </div>
+
+                    <div class="action-buttons d-flex gap-2">
+                      <button type="submit" class="btn btn-save flex-grow-1" [disabled]="editform.invalid" style="height: 32px; padding: 0 12px; font-size: 12px; font-weight: 600; border-radius: 6px;">
+                        Save
+                      </button>
+                      <button type="button" class="btn btn-cancel flex-grow-1" (click)="cancelEdit()" style="height: 32px; padding: 0 12px; font-size: 12px; font-weight: 600; border-radius: 6px;">
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+              </div>
             </div>
-
-            <!-- Partners In-Line Form Edit Mode -->
-        <!-- Inside partners-menu.component.html -->
-<!-- Inside partners-menu.component.html -->
-<div *ngIf="editingProductId === meal.idMeal">
-  <form [formGroup]="editform" (ngSubmit)="saveProductUpdate(meal)">
-
-    <div class="form-group">
-      <label>Display Price (TND) <span class="required-asterisk">* obligatoire</span></label>
-      <input
-        type="number"
-        formControlName="priceVariant"
-        step="0.5"
-        class="form-control"
-        title="Ce champ est obligatoire" />
-    </div>
-
-    <div class="form-group">
-      <label>Custom Description Override <span class="required-asterisk">* obligatoire</span></label>
-      <textarea
-        formControlName="descriptionOverride"
-        rows="2"
-        class="form-control"
-        title="Ce champ est obligatoire"></textarea>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label>Sort Index <span class="required-asterisk">* obligatoire</span></label>
-        <input
-          type="number"
-          formControlName="displayOrder"
-          class="form-control"
-          title="Ce champ est obligatoire" />
+          </div>
+        </div>
       </div>
-      <div class="form-group check-inline">
-        <input type="checkbox" id="visibleCheck-{{meal.idMeal}}" formControlName="visible" />
-        <label for="visibleCheck-{{meal.idMeal}}">Visible on QR</label>
-      </div>
-    </div>
-
-    <div class="action-buttons">
-      <button type="submit" class="btn btn-save" [disabled]="editform.invalid">Push Changes</button>
-      <button type="button" class="btn btn-cancel" (click)="cancelEdit()">Cancel</button>
-    </div>
-  </form>
-</div>
-
-          </div> <!-- /card-body -->
-        </div> <!-- /product-card -->
-      </div> <!-- /product-grid -->
     </main>
   </div>
 </div>

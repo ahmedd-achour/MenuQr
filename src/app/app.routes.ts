@@ -32,6 +32,10 @@ export const routes: Routes = [
         path: 'admin-panel/:id',
         component: HomePartnersComponent
     },
+     {
+        path: 'admin-panel/:id/menu',
+        component: PartnersMenuComponent
+    },
 
     {
         path: '',

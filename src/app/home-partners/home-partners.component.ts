@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Firestore, doc, docData, updateDoc } from '@angular/fire/firestore';
+import { Firestore, doc, docData, updateDoc, setDoc, collection, getDocs, getDoc, query, where } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytes, getDownloadURL } from '@angular/fire/storage';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -29,6 +29,18 @@ interface Restaurant {
   status: string;
 }
 
+interface Theme {
+  id?: string;
+  restaurantId: string;
+  primaryColor: string;
+  secondaryColor: string;
+  background: string;
+  cardColor: string;
+  font?: string;
+  radius?: number;
+  darkMode: boolean;
+}
+
 @Component({
   selector: 'app-home-partners',
   standalone: true,
@@ -55,9 +67,22 @@ export class HomePartnersComponent implements OnInit {
     status: 'trial'
   };
 
+  themeDocId!: string;
+  themeData: Theme = {
+    restaurantId: '',
+    primaryColor: '#d97706',
+    secondaryColor: '#78350f',
+    background: '#ffffff',
+    cardColor: '#f8fafc',
+    font: 'Outfit',
+    radius: 8,
+    darkMode: false
+  };
+
   isSaving = false;
   notificationMessage = '';
   isError = false;
+  addedProducts: any[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -106,11 +131,40 @@ export class HomePartnersComponent implements OnInit {
       next: (restaurant: any) => {
         if (restaurant) {
           this.restaurantData = { ...restaurant } as Restaurant;
+          this.fetchTheme(restaurantId);
+          this.fetchAddedProducts(restaurantId);
         }
       },
       error: (err) => {
         console.error(err);
         this.triggerAlert('Error loading restaurant data.', true);
+      }
+    });
+  }
+
+  private fetchTheme(restaurantId: string): void {
+    this.themeDocId = `theme_${restaurantId}`;
+    const themeDocRef = doc(this.firestore, `themes/${this.themeDocId}`);
+    docData(themeDocRef).subscribe({
+      next: (theme: any) => {
+        if (theme) {
+          this.themeData = { ...theme } as Theme;
+        } else {
+          this.themeData = {
+            id: this.themeDocId,
+            restaurantId: restaurantId,
+            primaryColor: '#d97706',
+            secondaryColor: '#78350f',
+            background: '#ffffff',
+            cardColor: '#f8fafc',
+            font: 'Outfit',
+            radius: 8,
+            darkMode: false
+          };
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching theme:', err);
       }
     });
   }
@@ -138,8 +192,21 @@ export class HomePartnersComponent implements OnInit {
     const restaurantDocRef = doc(this.firestore, `restaurants/${this.restaurantData.id}`);
     updateDoc(restaurantDocRef, payload)
       .then(() => {
+        const themeDocRef = doc(this.firestore, `themes/${this.themeDocId}`);
+        return setDoc(themeDocRef, {
+          restaurantId: this.restaurantData.id,
+          primaryColor: this.themeData.primaryColor,
+          secondaryColor: this.themeData.secondaryColor,
+          background: this.themeData.background,
+          cardColor: this.themeData.cardColor,
+          font: this.themeData.font || 'Outfit',
+          radius: Number(this.themeData.radius) || 8,
+          darkMode: !!this.themeData.darkMode
+        }, { merge: true });
+      })
+      .then(() => {
         this.isSaving = false;
-        this.triggerAlert('Restaurant profile successfully updated!', false);
+        this.triggerAlert('Restaurant profile and theme configuration successfully updated!', false);
       })
       .catch((err) => {
         this.isSaving = false;
@@ -197,6 +264,49 @@ export class HomePartnersComponent implements OnInit {
     setTimeout(() => {
       this.notificationMessage = '';
     }, 6000);
+  }
+
+  private async fetchAddedProducts(restaurantId: string): Promise<void> {
+    try {
+      const localProductsRef = collection(this.firestore, 'restaurant_products');
+      const localQuery = query(localProductsRef, where('restaurantId', '==', restaurantId));
+      const snapshot = await getDocs(localQuery);
+
+      const fetchPromises = snapshot.docs.map(async (d) => {
+        const prodData = d.data();
+        const masterProductId = prodData['masterProductId'];
+        
+        let name = 'Produit';
+        let defaultImage = '';
+        let description = '';
+        
+        if (masterProductId) {
+          const masterDocRef = doc(this.firestore, `master_products/${masterProductId}`);
+          const masterSnap = await getDoc(masterDocRef);
+          if (masterSnap.exists()) {
+            const masterData = masterSnap.data();
+            name = masterData['name'] || name;
+            defaultImage = masterData['image'] || defaultImage;
+            description = masterData['description'] || description;
+          }
+        }
+
+        return {
+          id: d.id,
+          name: name,
+          image: prodData['imageOverride'] || defaultImage,
+          description: prodData['descriptionOverride'] || description,
+          price: prodData['priceVariant'] || 12.00,
+          visible: prodData['visible'] !== false,
+          displayOrder: prodData['displayOrder'] || 0
+        };
+      });
+
+      this.addedProducts = await Promise.all(fetchPromises);
+      this.addedProducts.sort((a, b) => a.displayOrder - b.displayOrder);
+    } catch (err) {
+      console.error('Error fetching active products:', err);
+    }
   }
 
 }
