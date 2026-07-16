@@ -66,7 +66,7 @@ export class PartnersMenuComponent implements OnInit {
   ngOnInit(): void {
     this.initEditForm();
     this.initCreateProductForm();
-    
+
     // Read user ID dynamically
     this.userId = this.route.snapshot.paramMap.get('id') || '';
     if (this.userId) {
@@ -204,7 +204,7 @@ export class PartnersMenuComponent implements OnInit {
 
     // Cross-reference the name string to grab the true Firestore Category Document ID
     const matchingCategory = this.categories.find(c => c.strCategory === category);
-    
+
     // Optimized read: read pre-mapped productIds array directly
     const productIds: string[] = matchingCategory ? (matchingCategory.productIds || []) : [];
 
@@ -354,7 +354,7 @@ export class PartnersMenuComponent implements OnInit {
         if (sizeConfig) {
           const optId = `opt_${this.currentRestaurantId}_${meal.idMeal}_${size}`;
           const optDocRef = doc(this.firestore, `restaurant_product_options/${optId}`);
-          
+
           const optPayload = {
             id: optId,
             restaurantId: this.currentRestaurantId,
@@ -365,7 +365,7 @@ export class PartnersMenuComponent implements OnInit {
             available: !!sizeConfig.available,
             optionPrices: {}
           };
-          
+
           await setDoc(optDocRef, optPayload, { merge: true });
           updatedOpts.push(optPayload);
         }
@@ -386,7 +386,7 @@ export class PartnersMenuComponent implements OnInit {
 
   async removeProduct(meal: any) {
     const documentId = `${this.currentRestaurantId}_${meal.idMeal}`;
-    
+
     try {
       // 1. Delete Restaurant Product Document
       const productDocRef = doc(this.firestore, `restaurant_products/${documentId}`);
@@ -406,7 +406,7 @@ export class PartnersMenuComponent implements OnInit {
       // Synchronize state references locally inside the view map
       meal.isSynced = false;
       meal.localData = null;
-      
+
       if (this.editingProductId === meal.idMeal) {
         this.editingProductId = null;
       }
@@ -454,7 +454,7 @@ export class PartnersMenuComponent implements OnInit {
 
     const formValues = this.createProductForm.value;
     const masterProductId = `prod_${Date.now()}`;
-    
+
     // Build sizes array
     const defaultSizes: string[] = [];
     if (formValues.sizesStandard) defaultSizes.push('Standard');

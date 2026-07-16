@@ -9,6 +9,7 @@ import { PolicyComponent } from './policy/policy.component';
 import { Coffe1Component } from './coffe1/coffe1.component';
 import { Coffee2Component } from './coffee2/coffee2.component';
 import { Coffee3Component } from './coffee3/coffee3.component';
+import { QrCodeComponent } from './qr-code/qr-code.component';
 
 export const routes: Routes = [
     {
@@ -38,6 +39,10 @@ export const routes: Routes = [
     {
         path: 'admin-panel/:id/menu',
         component: PartnersMenuComponent
+    },
+     {
+        path: 'admin-panel/:id/qr-code',
+        component: QrCodeComponent
     },
 
     {

@@ -1,0 +1,69 @@
+<header class="sticky top-0 bg-white border-b shadow-sm z-50">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <img [src]="theme.logo" alt="Logo" class="h-10 w-auto rounded-xl">
+      <h1 class="text-2xl font-semibold">{{ restaurantName }}</h1>
+    </div>
+    <div class="flex items-center gap-6">
+      <button (click)="toggleDarkMode()" class="p-3 rounded-2xl hover:bg-zinc-100">{{ isDark ? '☀️' : '🌙' }}</button>
+      <button (click)="toggleCart()" class="flex items-center gap-3 bg-emerald-600 text-white px-6 py-3 rounded-3xl hover:bg-emerald-700">
+        🛒 <span class="font-mono">{{ cart.length }}</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div *ngIf="isLoading" class="text-center py-20">Loading menu...</div>
+
+<div *ngIf="!isLoading" class="max-w-7xl mx-auto px-6 py-8">
+  <!-- Hero -->
+  <div class="h-80 rounded-3xl mb-10 relative overflow-hidden bg-cover bg-center"
+       [style.background-image]="'url(' + theme.cover + ')'">
+    <div class="absolute inset-0 bg-gradient-to-b from-black/40 to-black/70"></div>
+    <div class="absolute bottom-8 left-8 text-white">
+      <h2 class="text-5xl font-bold">{{ restaurantName }}</h2>
+    </div>
+  </div>
+
+  <!-- Categories -->
+  <div class="flex gap-3 overflow-x-auto pb-6 hide-scrollbar">
+    <button (click)="filterByCategory('all')" [class.active]="currentCategory==='all'" class="category-chip">All</button>
+    <button *ngFor="let cat of categories"
+            (click)="filterByCategory(cat.id)"
+            [class.active]="currentCategory===cat.id"
+            class="category-chip flex items-center gap-2">
+      {{ cat.icon }} {{ cat.name }}
+    </button>
+  </div>
+
+  <!-- Products -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div *ngFor="let p of filteredProducts"
+         class="product-card bg-white rounded-3xl overflow-hidden cursor-pointer"
+         (click)="openProductModal(p)">
+      <img [src]="p.displayImage" class="w-full h-56 object-cover" alt = hj>
+      <div class="p-5">
+        <h3 class="font-semibold text-lg">{{ p.displayName }}</h3>
+        <p class="text-zinc-600 text-sm line-clamp-2 my-2">{{ p.displayDesc }}</p>
+        <div class="flex justify-between items-center">
+          <span class="text-xl font-semibold text-emerald-600">${{ p.price | number:'1.2-2' }}</span>
+          <button (click)="addToCart($event, p)" class="bg-emerald-600 text-white px-5 py-2 rounded-2xl text-sm">Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Simple Product Modal -->
+<div *ngIf="selectedProduct" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50" (click)="closeModal()">
+  <div class="bg-white rounded-3xl max-w-md w-full p-6" (click)="$event.stopPropagation()">
+    <img [src]="selectedProduct.displayImage" class="w-full rounded-2xl mb-4" alt ="kn">
+    <h2 class="text-2xl font-bold">{{ selectedProduct.displayName }}</h2>
+    <p class="text-emerald-600 text-2xl font-semibold my-2">${{ selectedProduct.price | number:'1.2-2' }}</p>
+    <p class="text-zinc-600">{{ selectedProduct.displayDesc }}</p>
+    <button (click)="addToCart(null, selectedProduct); closeModal()"
+            class="mt-6 w-full py-4 bg-emerald-600 text-white rounded-3xl font-medium">
+      Add to Cart
+    </button>
+  </div>
+</div>
