@@ -56,9 +56,37 @@
               "src/assets/tasty/css/icomoon.css",
               "src/assets/tasty/css/bootstrap.css",
               "src/assets/tasty/css/flexslider.css",
-              "src/assets/tasty/css/style.css"
+              "src/assets/tasty/css/style.css",
+              "src/assets/cofee3/css/bootstrap.min.css",
+    "src/assets/coffee2/lib/owlcarousel/assets/owl.carousel.min.css" ,
+    "src/assets/coffee2/lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css" ,
+      "src/assets/coffee2/css/style.min.css" ,
+
+
+              "src/assets/cofee3/css/style.css",
+              "src/assets/cofee3/css/responsive.css"
             ],
             "scripts": [
+
+
+                "src/assets/coffee2/lib/easing/easing.min.js",
+    "src/assets/coffee2/lib/waypoints/waypoints.min.js",
+    "src/assets/coffee2/lib/owlcarousel/owl.carousel.min.js",
+    "src/assets/coffee2/lib/tempusdominus/js/moment.min.js",
+    "src/assets/coffee2/lib/tempusdominus/js/moment-timezone.min.js",
+    "src/assets/coffee2/lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js",
+
+    "src/assets/coffee2/mail/jqBootstrapValidation.min.js",
+    "src/assets/coffee2/mail/contact.js",
+
+    "src/assets/coffee2/js/main.js",
+              "src/assets/cofee3/js/jquery.min.js",
+              "src/assets/cofee3/js/popper.min.js",
+              "src/assets/cofee3/js/bootstrap.bundle.min.js",
+              "src/assets/cofee3/js/jquery-3.0.0.min.js",
+              "src/assets/cofee3/js/plugin.js",
+              "src/assets/cofee3/js/jquery.mCustomScrollbar.concat.min.js",
+              "src/assets/cofee3/js/custom.js",
               "src/assets/coffee/js/vendor/jquery-2.2.4.min.js",
               "src/assets/coffee/js/vendor/bootstrap.min.js",
               "src/assets/coffee/js/easing.min.js",

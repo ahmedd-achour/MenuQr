@@ -13,7 +13,7 @@
 		</li>
 
 		<li class="t-center m-b-13">
-								<div routerLink="/menu">Menu</div>
+			<div routerLink="/menu">Menu</div>
 		</li>
 
 		<li class="t-center m-b-13">
@@ -113,13 +113,9 @@
 
 					<div class="wrap-btn-slide1 animated visible-false" data-appear="zoomIn">
 						<!-- Button1 -->
-<div
-  routerLink="/menu"
-  style="cursor: pointer;"
-  tabindex="0"
-  role="button">
-  Menu
-</div>							Look Menu
+						<div routerLink="/menu" style="cursor: pointer;" tabindex="0" role="button">
+							Menu
+						</div> Look Menu
 					</div>
 				</div>
 			</div>
@@ -180,7 +176,7 @@
 		<h3 class="tit4 t-center p-l-15 p-r-15 p-t-3">
 			Les Caffee </h3>
 	</div>
-
+	<router-outlet></router-outlet>
 	<div class="content-intro bg-white p-t-77 p-b-133">
 		<div class="container">
 			<div class="row">
@@ -188,24 +184,23 @@
 					<!-- Block1 -->
 					<div class="blo1">
 						<div class="wrap-pic-blo1 bo-rad-10 hov-img-zoom">
-							<a href="#"><img src="../../assets/coffe1.PNG" alt="IMG-INTRO"></a>
+							<a routerLink="/coffee3"> <img src="../../assets/coffe1.PNG" alt="IMG-INTRO"></a>
 						</div>
 
 						<div class="wrap-text-blo1 p-t-35">
-							<a href="#">
+							<a routerLink="/coffee3">
+
 								<h4 class="txt5 color0-hov trans-0-4 m-b-13">
-									Romantic Restaurant
+									Café Évasion
 								</h4>
 							</a>
 
 							<p class="m-b-20">
-								Phasellus lorem enim, luctus ut velit eget, con-vallis egestas eros.
+								Un moment de détente à la découverte de cafés torréfiés avec une saveur douce, élégante
+								et parfaitement équilibrée.
 							</p>
 
-							<a href="#" class="txt4">
-								Learn More
-								<i class="fa fa-long-arrow-right m-l-10" aria-hidden="true"></i>
-							</a>
+
 						</div>
 					</div>
 				</div>
@@ -214,50 +209,57 @@
 					<!-- Block1 -->
 					<div class="blo1">
 						<div class="wrap-pic-blo1 bo-rad-10 hov-img-zoom">
-							<a href="#"><img src="../../assets/coffe2.PNG" alt="IMG-INTRO"></a>
+							<a href="/coffee">
+								<img src="../../assets/coffe2.PNG" alt="IMG-INTRO">
+							</a>
 						</div>
 
 						<div class="wrap-text-blo1 p-t-35">
-							<a href="#">
+							<a href="/coffee">
 								<h4 class="txt5 color0-hov trans-0-4 m-b-13">
-									Delicious Food
+									Café Gourmand
 								</h4>
 							</a>
 
 							<p class="m-b-20">
-								Aliquam eget aliquam magna, quis posuere risus ac justo ipsum nibh urna
+								Une expérience gourmande où chaque tasse révèle des arômes riches, chauds et
+								parfaitement préparés pour sublimer vos pauses.
 							</p>
 
-							<a href="#" class="txt4">
-								Learn More
-								<i class="fa fa-long-arrow-right m-l-10" aria-hidden="true"></i>
-							</a>
+
 						</div>
+
+
+
+
 					</div>
+
+
+
+
+
 				</div>
 
 				<div class="col-md-4 p-t-30">
 					<!-- Block1 -->
 					<div class="blo1">
 						<div class="wrap-pic-blo1 bo-rad-10 hov-img-zoom">
-							<a href="#"><img src="../../assets/coffe3.PNG" alt="IMG-INTRO"></a>
+							<a routerLink="/coffee2"><img src="../../assets/coffe3.PNG" alt="IMG-INTRO"></a>
 						</div>
 
 						<div class="wrap-text-blo1 p-t-35">
-							<a href="#">
+							<a routerLink="/coffee">
 								<h4 class="txt5 color0-hov trans-0-4 m-b-13">
-									Red Wines You Love
+									Café Prestige
 								</h4>
 							</a>
 
 							<p class="m-b-20">
-								Sed ornare ligula eget tortor tempor, quis porta tellus dictum.
+								Une sélection raffinée de cafés exclusifs conçue pour les amateurs de qualité,
+								d’originalité et de moments de plaisir inoubliables.
 							</p>
 
-							<a href="#" class="txt4">
-								Learn More
-								<i class="fa fa-long-arrow-right m-l-10" aria-hidden="true"></i>
-							</a>
+
 						</div>
 					</div>
 				</div>
@@ -384,76 +386,49 @@
 							</h3>
 						</div>
 
-						<!-- Block2 -->
-						<div class="blo2 flex-w flex-str flex-col-c-m-lg animated visible-false"
-							data-appear="fadeInDown">
-							<!-- Pic block2 -->
-							<a href="#" class="wrap-pic-blo2 bg2-blo2"
-								style="background-image: url(../../assets/pato/images/event-06.jpg);">
-								<div class="time-event size10 txt6 effect1">
-									<span class="txt-effect1 flex-c-m">
-										08:00 PM Tuesday - 21 November 2018
-									</span>
-								</div>
-							</a>
 
-							<!-- Text block2 -->
-							<div class="wrap-text-blo2 flex-col-c-m p-l-40 p-r-40 p-t-45 p-b-30">
-								<h4 class="tit7 t-center m-b-10">
-									Wines during specific nights
-								</h4>
 
-								<p class="t-center">
-									Donec quis lorem nulla. Nunc eu odio mi. Morbi nec lobortis est. Sed fringilla, nunc
-									sed imperdiet lacinia
-								</p>
-
-								<div class="flex-sa-m flex-w w-full m-t-40">
-									<div class="size11 flex-col-c-m">
-										<span class="dis-block t-center txt7 m-b-2 days">
-											25
-										</span>
-
-										<span class="dis-block t-center txt8">
-											Days
-										</span>
-									</div>
-
-									<div class="size11 flex-col-c-m">
-										<span class="dis-block t-center txt7 m-b-2 hours">
-											12
-										</span>
-
-										<span class="dis-block t-center txt8">
-											Hours
-										</span>
-									</div>
-
-									<div class="size11 flex-col-c-m">
-										<span class="dis-block t-center txt7 m-b-2 minutes">
-											59
-										</span>
-
-										<span class="dis-block t-center txt8">
-											Minutes
-										</span>
-									</div>
-
-									<div class="size11 flex-col-c-m">
-										<span class="dis-block t-center txt7 m-b-2 seconds">
-											56
-										</span>
-
-										<span class="dis-block t-center txt8">
-											Seconds
-										</span>
-									</div>
+						<div class="event-contact-layout">
+							<div class="event-form-card">
+								<div class="event-form-title">
+									<span>Réservez votre expérience</span>
+									<h4>Contactez-nous</h4>
 								</div>
 
-								<a href="#" class="txt4 m-t-40">
-									View Details
-									<i class="fa fa-long-arrow-right m-l-10" aria-hidden="true"></i>
-								</a>
+								<div class="event-form-fields">
+									<input type="text" class="event-mail-text" placeholder="Votre nom" name="name">
+									<input type="email" class="event-mail-text" placeholder="Votre email" name="email">
+									<input type="tel" class="event-mail-text" placeholder="Votre téléphone"
+										name="phone">
+									<textarea class="event-massage-bt" placeholder="Votre message" rows="5"
+										name="message"></textarea>
+									<button type="button" class="event-send-btn">Envoyer</button>
+								</div>
+							</div>
+
+							<div class="event-map-card">
+								<div class="event-map-frame">
+									<iframe title="Localisation de l'établissement"
+										src="https://www.google.com/maps?q=Paris%2C%20France&amp;z=14&amp;output=embed"
+										loading="lazy" allowfullscreen=""></iframe>
+								</div>
+							</div>
+						</div>
+
+						<div class="event-highlight-card">
+							<div class="event-highlight-media"></div>
+							<div class="event-highlight-content">
+								<span class="event-chip">Soirée spéciale</span>
+								<h4>Wines during specific nights</h4>
+								<p>Profitez d’une remise exclusive de 20% sur votre réservation du vendredi au dimanche
+									jusqu’à la fin de la semaine. Réservez vite avant la fin de l’offre !</p>
+								<div class="event-counter" id="event-counter">
+									<div><span data-unit="days">00</span><small>Days</small></div>
+									<div><span data-unit="hours">00</span><small>Hours</small></div>
+									<div><span data-unit="minutes">00</span><small>Minutes</small></div>
+									<div><span data-unit="seconds">00</span><small>Seconds</small></div>
+								</div>
+								<a href="#" class="event-link">Réserver maintenant</a>
 							</div>
 						</div>
 					</div>
@@ -469,6 +444,144 @@
 
 
 
+<!-- Footer -->
+<footer class="bg1">
+	<div class="container p-t-40 p-b-70">
+		<div class="row">
+			<div class="col-sm-6 col-md-4 p-t-50">
+				<!-- - -->
+				<h4 class="txt13 m-b-33">
+					Contact Us
+				</h4>
+
+				<ul class="m-b-70">
+					<li class="txt14 m-b-14">
+						<i class="fa fa-map-marker fs-16 dis-inline-block size19" aria-hidden="true"></i>
+						8th floor, 379 Hudson St, New York, NY 10018
+					</li>
+
+					<li class="txt14 m-b-14">
+						<i class="fa fa-phone fs-16 dis-inline-block size19" aria-hidden="true"></i>
+						(+1) 96 716 6879
+					</li>
+
+					<li class="txt14 m-b-14">
+						<i class="fa fa-envelope fs-13 dis-inline-block size19" aria-hidden="true"></i>
+						contact&#64;site.com
+					</li>
+				</ul>
+
+				<!-- - -->
+				<h4 class="txt13 m-b-32">
+					Opening Times
+				</h4>
+
+				<ul>
+					<li class="txt14">
+						09:30 AM – 11:00 PM
+					</li>
+
+					<li class="txt14">
+						Every Day
+					</li>
+				</ul>
+			</div>
+
+			<div class="col-sm-6 col-md-4 p-t-50">
+				<!-- - -->
+				<h4 class="txt13 m-b-33">
+					Latest twitter
+				</h4>
+
+				<div class="m-b-25">
+					<span class="fs-13 color2 m-r-5">
+						<i class="fa fa-twitter" aria-hidden="true"></i>
+					</span>
+					<a href="#" class="txt15">
+						&#64;colorlib
+					</a>
+
+					<p class="txt14 m-b-18">
+						Activello is a good option. It has a slider built into that displays the featured image in the
+						slider.
+						<a href="#" class="txt15">
+							https://buff.ly/2zaSfAQ
+						</a>
+					</p>
+
+					<span class="txt16">
+						21 Dec 2017
+					</span>
+				</div>
+
+				<div>
+					<span class="fs-13 color2 m-r-5">
+						<i class="fa fa-twitter" aria-hidden="true"></i>
+					</span>
+					<a href="#" class="txt15">
+						&#64;colorlib
+					</a>
+
+					<p class="txt14 m-b-18">
+						Activello is a good option. It has a slider built into that displays
+						<a href="#" class="txt15">
+							https://buff.ly/2zaSfAQ
+						</a>
+					</p>
+
+					<span class="txt16">
+						21 Dec 2017
+					</span>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	<div class="end-footer bg2">
+		<div class="container">
+			<div class="flex-sb-m flex-w p-t-22 p-b-22">
+				<div class="p-t-5 p-b-5">
+					<a href="#" class="fs-15 c-white"><i class="fa fa-tripadvisor" aria-hidden="true"></i></a>
+					<a href="#" class="fs-15 c-white"><i class="fa fa-facebook m-l-18" aria-hidden="true"></i></a>
+					<a href="#" class="fs-15 c-white"><i class="fa fa-twitter m-l-18" aria-hidden="true"></i></a>
+				</div>
+
+				<div class="txt17 p-r-20 p-t-5 p-b-5">
+					Copyright &copy; 2018 All rights reserved | This template is made with <i class="fa fa-heart"></i>
+					by
+				</div>
+			</div>
+		</div>
+	</div>
+</footer>
+
+
+<!-- Back to top -->
+<div class="btn-back-to-top bg0-hov" id="myBtn">
+	<span class="symbol-btn-back-to-top">
+		<i class="fa fa-angle-double-up" aria-hidden="true"></i>
+	</span>
+</div>
+
+<!-- Container Selection1 -->
+<div id="dropDownSelect1"></div>
+
+<!-- Modal Video 01-->
+<div class="modal fade" id="modal-video-01" tabindex="-1" role="dialog" aria-hidden="true">
+
+	<div class="modal-dialog" role="document" data-dismiss="modal">
+		<div class="close-mo-video-01 trans-0-4" data-dismiss="modal" aria-label="Close">&times;</div>
+
+		<div class="wrap-video-mo-01">
+			<div class="w-full wrap-pic-w op-0-0"><img src="images/icons/video-16-9.jpg" alt="IMG"></div>
+			<div class="video-mo-01">
+				<iframe src="https://www.youtube.com/embed/5k1hSu2gdKE?rel=0&amp;showinfo=0" allowfullscreen></iframe>
+			</div>
+		</div>
+	</div>
+</div>
+
 <!-- Video -->
 
 
@@ -477,4 +590,3 @@
 
 
 <!-- Sign up -->
-
