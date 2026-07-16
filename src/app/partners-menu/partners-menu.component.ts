@@ -54,6 +54,9 @@ export class PartnersMenuComponent implements OnInit {
   editingProductId: string | null = null;
   editform!: FormGroup;
 
+  createProductForm!: FormGroup;
+  showCreateForm = false;
+
   constructor(
     private fb: FormBuilder,
     private firestore: Firestore,
@@ -62,6 +65,7 @@ export class PartnersMenuComponent implements OnInit {
 
   ngOnInit(): void {
     this.initEditForm();
+    this.initCreateProductForm();
     
     // Read user ID dynamically
     this.userId = this.route.snapshot.paramMap.get('id') || '';
@@ -229,7 +233,7 @@ export class PartnersMenuComponent implements OnInit {
     return from(Promise.all(fetchPromises)).pipe(
       map(products => {
         // Filter out null values and inactive products
-        const validProducts = (products as any[]).filter(p => p !== null && p.active !== false);
+        const validProducts = (products as any[]).filter(p => p !== null && p.active === true);
 
         this.mealdbProducts = validProducts.map((data: any) => {
           const parsedId = data.id;
@@ -410,6 +414,105 @@ export class PartnersMenuComponent implements OnInit {
       console.log('Successfully deleted overrides and variants for product:', documentId);
     } catch (err) {
       console.error('Failed deleting product overrides & options:', err);
+    }
+  }
+
+  initCreateProductForm() {
+    this.createProductForm = this.fb.group({
+      name: ['', [Validators.required, Validators.minLength(3)]],
+      categoryId: ['', [Validators.required]],
+      description: ['', [Validators.required, Validators.minLength(5)]],
+      image: [''],
+      sizesStandard: [true],
+      sizesMedium: [false],
+      sizesLarge: [false]
+    });
+  }
+
+  selectedCategoryDocId(): string {
+    const found = this.categories.find(c => c.strCategory === this.selectedCategory);
+    return found ? found.idCategory : '';
+  }
+
+  toggleCreateForm() {
+    this.showCreateForm = !this.showCreateForm;
+    if (this.showCreateForm) {
+      this.createProductForm.patchValue({
+        categoryId: this.selectedCategoryDocId(),
+        sizesStandard: true,
+        sizesMedium: false,
+        sizesLarge: false
+      });
+    }
+  }
+
+  async handleCreateProduct() {
+    if (this.createProductForm.invalid) {
+      this.createProductForm.markAllAsTouched();
+      return;
+    }
+
+    const formValues = this.createProductForm.value;
+    const masterProductId = `prod_${Date.now()}`;
+    
+    // Build sizes array
+    const defaultSizes: string[] = [];
+    if (formValues.sizesStandard) defaultSizes.push('Standard');
+    if (formValues.sizesMedium) defaultSizes.push('Medium');
+    if (formValues.sizesLarge) defaultSizes.push('Large');
+    if (defaultSizes.length === 0) defaultSizes.push('Standard'); // Fallback
+
+    const productPayload = {
+      categoryId: formValues.categoryId,
+      subCategoryId: null,
+      name: formValues.name,
+      description: formValues.description,
+      image: formValues.image || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=500',
+      tags: [this.categories.find(c => c.idCategory === formValues.categoryId)?.strCategory || ''],
+      searchableKeywords: [formValues.name.toLowerCase()],
+      defaultSizes: defaultSizes,
+      defaultOptions: [],
+      active: false // default active is false
+    };
+
+    try {
+      // 1. Write product to master_products
+      const productRef = doc(this.firestore, `master_products/${masterProductId}`);
+      await setDoc(productRef, productPayload);
+
+      // 2. Add product to category productIds array
+      const categoryDocRef = doc(this.firestore, `master_categories/${formValues.categoryId}`);
+      const categorySnap = await getDoc(categoryDocRef);
+      if (categorySnap.exists()) {
+        const categoryData = categorySnap.data();
+        const currentIds: string[] = categoryData['productIds'] || [];
+        if (!currentIds.includes(masterProductId)) {
+          currentIds.push(masterProductId);
+          await setDoc(categoryDocRef, { productIds: currentIds }, { merge: true });
+        }
+      }
+
+      console.log('Successfully created custom master product proposal:', masterProductId);
+      alert('Votre proposition de produit a été soumise avec succès ! Elle sera visible sur la carte après validation par un administrateur.');
+
+      // Reset and hide form
+      this.createProductForm.reset({
+        name: '',
+        categoryId: this.selectedCategoryDocId(),
+        description: '',
+        image: '',
+        sizesStandard: true,
+        sizesMedium: false,
+        sizesLarge: false
+      });
+      this.showCreateForm = false;
+
+      // Refresh the products list for the category
+      this.fetchMealsByCategory(this.selectedCategory).subscribe();
+
+    } catch (err) {
+      console.error('Failed to create custom master product:', err);
+      alert('Une erreur est survenue lors de la création du produit.');
     }
   }
 }

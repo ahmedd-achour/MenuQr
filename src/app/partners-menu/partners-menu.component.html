@@ -1,13 +1,8 @@
 <app-header-partner [userId]="userId"></app-header-partner>
-<div class="partners-dashboard container-fluid p-t-30 p-b-50">
-  <header class="dashboard-header d-flex justify-content-between align-items-center m-b-30 bg-white p-3 bo-rad-10 shadow-sm">
-    <h2 style="font-weight: 700; color: #111827; margin: 0; font-size: 1.5rem;">Dynamic Menu Management</h2>
-    <span class="badge active-badge" style="font-size: 13px; font-weight: 600; color: #4b5563; background-color: #f3f4f6; border: 1px solid #e5e7eb; padding: 6px 12px; border-radius: 6px;">
-      Restaurant Space ID: {{ currentRestaurantId }}
-    </span>
-  </header>
+<div class="partners-dashboard container-fluid px-md-5 px-3 p-t-30 p-b-50">
 
-  <div class="row">
+
+  <div class="row align-items-stretch">
     <!-- Sidebar Categories Column -->
     <aside class="col-lg-3 col-md-4 col-sm-12 m-b-30">
       <div class="sidebar-categories card border-0 shadow-sm p-4 bo-rad-10 bg-white">
@@ -35,9 +30,73 @@
     <!-- Menu Display Area Column -->
     <main class="col-lg-9 col-md-8 col-sm-12">
       <div class="card border-0 shadow-sm p-4 bo-rad-10 bg-white m-b-30">
-        <h3 class="m-b-30" style="font-weight: 700; color: #111827; font-size: 20px;">
-          Items under Category: <span class="highlight" style="color: #0284c7;">{{ selectedCategory }}</span>
-        </h3>
+        <div class="d-flex justify-content-between align-items-center m-b-30 flex-wrap gap-3">
+          <h3 style="font-weight: 700; color: #111827; font-size: 20px; margin: 0;">
+            Items under Category: <span class="highlight" style="color: #0284c7;">{{ selectedCategory }}</span>
+          </h3>
+          <button type="button" class="btn btn-save" style="width: auto; padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px;" (click)="toggleCreateForm()">
+            <i class="fa" [ngClass]="showCreateForm ? 'fa-times' : 'fa-plus-circle'"></i>
+            {{ showCreateForm ? 'Fermer' : 'Proposer un Produit' }}
+          </button>
+        </div>
+
+        <!-- Collapsible Custom Product Proposal Form -->
+        <div *ngIf="showCreateForm" class="card border p-4 m-b-35 bg-light" style="border-radius: 10px; border-color: #e5e7eb !important;">
+          <h4 style="font-weight: 700; color: #1e293b; font-size: 15px;" class="m-b-15">Proposer un nouveau produit au catalogue</h4>
+
+          <form [formGroup]="createProductForm" (ngSubmit)="handleCreateProduct()">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #4b5563;">Nom du Produit *</label>
+                <input type="text" formControlName="name" class="form-control" placeholder="Ex: Espresso Double" style="border-radius: 6px; padding: 8px 12px;" required />
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #4b5563;">Catégorie *</label>
+                <select formControlName="categoryId" class="form-select form-control" title="Catégorie" style="border-radius: 6px; height: 38px;" required>
+                  <option *ngFor="let cat of categories" [value]="cat.idCategory">{{ cat.strCategory }}</option>
+                </select>
+              </div>
+
+              <div class="col-12 mb-3">
+                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #4b5563;">Description *</label>
+                <textarea formControlName="description" rows="3" class="form-control" placeholder="Ex: Double dose de café pur arabica avec un arôme intense..." style="border-radius: 6px; padding: 8px 12px;" required></textarea>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #4b5563;">Lien Image (Optionnel)</label>
+                <input type="text" formControlName="image" class="form-control" placeholder="Ex: https://images.unsplash.com/... (ou vide pour défaut)" style="border-radius: 6px; padding: 8px 12px;" />
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #4b5563;">Tailles Disponibles (Sélectionnez au moins une)</label>
+                <div class="d-flex align-items-center gap-3 flex-wrap" style="height: 38px;">
+                  <div class="form-check form-check-inline d-flex align-items-center gap-1 mb-0">
+                    <input type="checkbox" id="sizeStd" formControlName="sizesStandard" style="width: 16px; height: 16px; cursor: pointer; accent-color: #0284c7;" />
+                    <label for="sizeStd" class="mb-0 cursor-pointer" style="font-size: 13px; font-weight: 600;">Standard</label>
+                  </div>
+                  <div class="form-check form-check-inline d-flex align-items-center gap-1 mb-0">
+                    <input type="checkbox" id="sizeMed" formControlName="sizesMedium" style="width: 16px; height: 16px; cursor: pointer; accent-color: #0284c7;" />
+                    <label for="sizeMed" class="mb-0 cursor-pointer" style="font-size: 13px; font-weight: 600;">Medium</label>
+                  </div>
+                  <div class="form-check form-check-inline d-flex align-items-center gap-1 mb-0">
+                    <input type="checkbox" id="sizeLrg" formControlName="sizesLarge" style="width: 16px; height: 16px; cursor: pointer; accent-color: #0284c7;" />
+                    <label for="sizeLrg" class="mb-0 cursor-pointer" style="font-size: 13px; font-weight: 600;">Large</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="text-end mt-3 d-flex gap-2 justify-content-end">
+              <button type="submit" class="btn btn-save" [disabled]="createProductForm.invalid" style="width: auto; padding: 10px 24px; font-size: 13px; font-weight: 700; border-radius: 6px;">
+                <i class="fa fa-paper-plane mr-1"></i> Soumettre
+              </button>
+              <button type="button" class="btn btn-cancel" (click)="toggleCreateForm()" style="width: auto; padding: 10px 24px; font-size: 13px; font-weight: 700; border-radius: 6px;">
+                Annuler
+              </button>
+            </div>
+          </form>
+        </div>
 
         <div class="row">
           <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 p-b-30" *ngFor="let meal of mealdbProducts">
@@ -219,7 +278,7 @@
                 class="btn-save"
                 [disabled]="editform.invalid">
 
-                Save Changes
+                 Save
 
             </button>
 
