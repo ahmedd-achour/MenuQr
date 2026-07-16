@@ -286,20 +286,20 @@
       <div class="row">
         <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 p-b-30" *ngFor="let meal of addedProducts">
           <!-- Blo1 style from home page -->
-          <div class="blo1 bg-white bo-rad-10 overflow-hidden border trans-0-4 h-100 d-flex flex-column" 
+          <div class="blo1 bg-white bo-rad-10 overflow-hidden border trans-0-4 h-100 d-flex flex-column"
                style="border-color: #e5e7eb; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); transition: all 0.3s;"
                [style.opacity]="meal.visible ? '1' : '0.7'">
-            
+
             <div class="wrap-pic-blo1 bo-rad-10 hov-img-zoom pos-relative overflow-hidden" style="height: 160px;">
-              <img [src]="meal.image" [alt]="meal.name" style="width: 100%; height: 100%; object-fit: cover;">
-              
-              <span class="badge position-absolute" 
-                    [class.bg-success]="meal.visible" 
-                    [class.bg-warning]="!meal.visible" 
+              <img [src]="meal.image" [alt]="meal.name" style="width: 100%; height: 100%; object-fit: cover;" alt="jk" >
+
+              <span class="badge position-absolute"
+                    [class.bg-success]="meal.visible"
+                    [class.bg-warning]="!meal.visible"
                     style="top: 10px; right: 10px; z-index: 10; font-size: 9px; padding: 3px 6px; border-radius: 4px; color: #fff; font-weight: bold;">
                 {{ meal.visible ? 'Visible' : 'Hidden' }}
               </span>
-              <span class="badge bg-dark position-absolute" 
+              <span class="badge bg-dark position-absolute"
                     style="top: 10px; left: 10px; z-index: 10; font-size: 9px; padding: 3px 6px; border-radius: 4px; color: #fff; font-weight: bold;">
                 #{{ meal.displayOrder }}
               </span>
@@ -309,11 +309,11 @@
               <h4 class="txt5 color0-hov trans-0-4 m-b-5" style="font-weight: 700; font-size: 15px; color: #1f2937;">
                 {{ meal.name }}
               </h4>
-              
+
               <p class="m-b-10" style="font-size: 12px; color: #6b7280; line-height: 1.5; min-height: 36px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
                 {{ meal.description || 'Pas de description personnalisée.' }}
               </p>
-              
+
               <div class="mt-auto d-flex justify-content-between align-items-center p-t-10" style="border-top: 1px dashed #f3f4f6;">
                 <span class="text-muted small">Tarif principal</span>
                 <span class="text-primary font-weight-bold" style="font-size: 14px;">{{ meal.price | number:'1.2-2' }} TND</span>
