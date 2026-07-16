@@ -1,0 +1,218 @@
+/* Core Styling Matching Coffe1 Design */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+.qr-menu-wrapper {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--background-color, #f9f9ff);
+  color: #222222;
+  min-height: 100vh;
+  padding-top: 80px; /* space for fixed header */
+  box-sizing: border-box;
+}
+
+/* Header style override for Fixed navigation */
+#header {
+  background-color: rgba(0, 0, 0, 0.9);
+  padding: 15px 0;
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+}
+
+#header #logo img {
+  max-height: 40px;
+  border-radius: 4px;
+}
+
+.nav-menu {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 24px;
+}
+
+.nav-menu li a {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: color 0.3s ease;
+  text-decoration: none;
+}
+
+.nav-menu li.menu-active a,
+.nav-menu li a:hover {
+  color: var(--secondary-color, #b68834);
+}
+
+/* Banner Area matching Coffe1 Hero look */
+.banner-area {
+  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.65)), url('/assets/teste1.jpg') center;
+  background-size: cover;
+  padding: 120px 0 100px 0;
+  max-height: 200px;
+  text-align: left;
+}
+
+.banner-content h1 {
+  color: #ffffff;
+  font-size: 3.5rem;
+  font-weight: 700;
+  line-height: 1.15;
+  margin-top: 15px;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.banner-content h6 {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 2px;
+}
+
+.banner-content p {
+  font-size: 1.1rem;
+  max-width: 600px;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+/* Category Filter Chips styling */
+.categories-filter-wrapper {
+  margin: 40px 0 20px 0;
+}
+
+.categories-container {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  scrollbar-width: none; /* Firefox */
+}
+
+.categories-container::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.category-chip {
+  background: #ffffff;
+  border: 1px solid var(--secondary-color, #b68834);
+  color: var(--secondary-color, #b68834);
+  padding: 10px 24px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+}
+
+.category-chip:hover,
+.category-chip.active {
+  background: var(--secondary-color, #b68834);
+  color: #ffffff;
+  box-shadow: 0 10px 20px rgba(182, 136, 52, 0.2);
+}
+
+/* Single Menu Card design */
+.single-menu {
+  background-color: var(--card-color, #ffffff);
+  box-shadow: 0px 10px 30px 0px rgba(182, 136, 52, 0.15);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 30px;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(182, 136, 52, 0.05);
+}
+
+.single-menu:hover {
+  transform: translateY(-5px);
+  box-shadow: 0px 15px 35px 0px rgba(182, 136, 52, 0.25);
+}
+
+.product-img-wrapper {
+  margin-bottom: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  height: 200px;
+  position: relative;
+  background-color: #f1f2f6;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+}
+
+.product-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.single-menu:hover .product-img-wrapper img {
+  transform: scale(1.06);
+}
+
+.single-menu .title-div {
+  padding-bottom: 12px;
+  border-bottom: 1px dashed rgba(182, 136, 52, 0.2);
+  margin-bottom: 12px;
+}
+
+.single-menu h4 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #222222;
+  margin: 0;
+}
+
+.single-menu .price {
+  color: var(--secondary-color, #b68834);
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.single-menu p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #777777;
+  margin-bottom: 0;
+}
+
+/* Dark Mode Overrides */
+.qr-menu-wrapper.dark-theme {
+  --background-color: #121212;
+  --card-color: #1e1e1e;
+  color: #f1f2f6;
+}
+
+.qr-menu-wrapper.dark-theme .single-menu {
+  border-color: rgba(255, 255, 255, 0.05);
+  box-shadow: 0px 10px 30px 0px rgba(0, 0, 0, 0.5);
+}
+
+.qr-menu-wrapper.dark-theme .single-menu:hover {
+  box-shadow: 0px 15px 35px 0px rgba(0, 0, 0, 0.7);
+}
+
+.qr-menu-wrapper.dark-theme .single-menu h4 {
+  color: #f1f2f6;
+}
+
+.qr-menu-wrapper.dark-theme .single-menu p {
+  color: #a4b0be;
+}
+
+.qr-menu-wrapper.dark-theme .category-chip {
+  background: #222222;
+}
+
+.qr-menu-wrapper.dark-theme .category-chip.active {
+  background: var(--secondary-color, #b68834);
+  color: #ffffff;
+}

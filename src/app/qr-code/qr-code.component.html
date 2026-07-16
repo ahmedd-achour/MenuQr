@@ -1,69 +1,119 @@
-<header class="sticky top-0 bg-white border-b shadow-sm z-50">
-  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-    <div class="flex items-center gap-4">
-      <img [src]="theme.logo" alt="Logo" class="h-10 w-auto rounded-xl">
-      <h1 class="text-2xl font-semibold">{{ restaurantName }}</h1>
-    </div>
-    <div class="flex items-center gap-6">
-      <button (click)="toggleDarkMode()" class="p-3 rounded-2xl hover:bg-zinc-100">{{ isDark ? '☀️' : '🌙' }}</button>
-      <button (click)="toggleCart()" class="flex items-center gap-3 bg-emerald-600 text-white px-6 py-3 rounded-3xl hover:bg-emerald-700">
-        🛒 <span class="font-mono">{{ cart.length }}</span>
-      </button>
-    </div>
-  </div>
-</header>
 
-<div *ngIf="isLoading" class="text-center py-20">Loading menu...</div>
 
-<div *ngIf="!isLoading" class="max-w-7xl mx-auto px-6 py-8">
-  <!-- Hero -->
-  <div class="h-80 rounded-3xl mb-10 relative overflow-hidden bg-cover bg-center"
-       [style.background-image]="'url(' + theme.cover + ')'">
-    <div class="absolute inset-0 bg-gradient-to-b from-black/40 to-black/70"></div>
-    <div class="absolute bottom-8 left-8 text-white">
-      <h2 class="text-5xl font-bold">{{ restaurantName }}</h2>
-    </div>
-  </div>
+<div
+  class="qr-menu-wrapper"
+  [style.font-family]="theme?.font ? theme?.font + ', sans-serif' : 'Poppins, sans-serif'"
+  [style.--primary-color]="theme?.primaryColor || '#222222'"
+  [style.--secondary-color]="theme?.secondaryColor || '#b68834'"
+  [style.--background-color]="theme?.background || '#f9f9ff'"
+  [style.--card-color]="theme?.cardColor || '#ffffff'"
+  [class.dark-theme]="theme?.darkMode">
 
-  <!-- Categories -->
-  <div class="flex gap-3 overflow-x-auto pb-6 hide-scrollbar">
-    <button (click)="filterByCategory('all')" [class.active]="currentCategory==='all'" class="category-chip">All</button>
-    <button *ngFor="let cat of categories"
-            (click)="filterByCategory(cat.id)"
-            [class.active]="currentCategory===cat.id"
-            class="category-chip flex items-center gap-2">
-      {{ cat.icon }} {{ cat.name }}
-    </button>
-  </div>
+  <!-- Header Section -->
 
-  <!-- Products -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-    <div *ngFor="let p of filteredProducts"
-         class="product-card bg-white rounded-3xl overflow-hidden cursor-pointer"
-         (click)="openProductModal(p)">
-      <img [src]="p.displayImage" class="w-full h-56 object-cover" alt = hj>
-      <div class="p-5">
-        <h3 class="font-semibold text-lg">{{ p.displayName }}</h3>
-        <p class="text-zinc-600 text-sm line-clamp-2 my-2">{{ p.displayDesc }}</p>
-        <div class="flex justify-between items-center">
-          <span class="text-xl font-semibold text-emerald-600">${{ p.price | number:'1.2-2' }}</span>
-          <button (click)="addToCart($event, p)" class="bg-emerald-600 text-white px-5 py-2 rounded-2xl text-sm">Add</button>
+  <!-- Banner/Hero Section -->
+  <section class="banner-area" id="home" [style.background-image]="restaurant?.coverImage ? 'linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.65)), url(' + restaurant?.coverImage + ')' : null">
+    <div class="container">
+      <div class="row fullscreen d-flex align-items-center justify-content-start" style="min-height: 400px; padding: 100px 0;">
+        <div class="banner-content col-lg-7">
+          <h6 class="text-white text-uppercase">Now you can taste the quality</h6>
+          <h1>
+            {{ restaurant?.name || 'Welcome' }}
+          </h1>
+          <p class="text-white">
+            {{ restaurant?.description || 'Start your day with a delicious meal and freshly brewed coffee.' }}
+          </p>
         </div>
       </div>
     </div>
-  </div>
-</div>
+  </section>
 
-<!-- Simple Product Modal -->
-<div *ngIf="selectedProduct" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50" (click)="closeModal()">
-  <div class="bg-white rounded-3xl max-w-md w-full p-6" (click)="$event.stopPropagation()">
-    <img [src]="selectedProduct.displayImage" class="w-full rounded-2xl mb-4" alt ="kn">
-    <h2 class="text-2xl font-bold">{{ selectedProduct.displayName }}</h2>
-    <p class="text-emerald-600 text-2xl font-semibold my-2">${{ selectedProduct.price | number:'1.2-2' }}</p>
-    <p class="text-zinc-600">{{ selectedProduct.displayDesc }}</p>
-    <button (click)="addToCart(null, selectedProduct); closeModal()"
-            class="mt-6 w-full py-4 bg-emerald-600 text-white rounded-3xl font-medium">
-      Add to Cart
-    </button>
-  </div>
+  <!-- Main Menu Area -->
+  <section class="menu-area section-gap" id="menu" style="padding: 60px 0;">
+    <div class="container">
+      <div class="row d-flex justify-content-center">
+        <div class="menu-content pb-60 col-lg-10 text-center">
+          <div class="title text-center">
+            <h1 class="mb-10" [style.color]="theme?.primaryColor || '#222222'">it's all for you , you order - we serve</h1>
+            <p class="text-muted">Fresh ingredients, delicious taste, prepared with care.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading View -->
+      <div *ngIf="loading" class="text-center py-5">
+        <div class="spinner-border" role="status" [style.color]="theme?.secondaryColor || '#b68834'">
+          <span class="sr-only">Loading...</span>
+        </div>
+        <p class="mt-3 text-muted">Loading menu...</p>
+      </div>
+
+      <!-- Categories Filter Chips -->
+
+
+      <!-- Empty / Not Found View -->
+      <div *ngIf="!loading && filteredProducts.length === 0" class="text-center py-5">
+        <div style="font-size: 4rem; margin-bottom: 16px;">🍽️</div>
+        <h3>No Products Found</h3>
+        <p class="text-muted">We couldn't locate any products in this section.</p>
+      </div>
+
+      <!-- Products Grid -->
+      <div *ngIf="!loading && filteredProducts.length > 0" class="row">
+        <div *ngFor="let product of filteredProducts" class="col-lg-4 col-md-6">
+          <div class="single-menu">
+            <!-- Product Image -->
+            <div class="product-img-wrapper">
+              <img
+                [src]="product?.imageOverride || 'assets/placeholder-food.png'"
+                alt="product?.name"
+                loading="lazy">
+            </div>
+            <!-- Title and Price -->
+            <div class="title-div justify-content-between d-flex align-items-center">
+              <h4>{{ product?.name }}</h4>
+              <p class="price float-right">
+                {{ product?.priceVariant }} <span style="font-size: 0.75rem; font-weight: 500;">DT</span>
+              </p>
+            </div>
+            <!-- Description -->
+            <p>
+              {{ product?.descriptionOverride || product?.description || 'No description available.' }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer Section -->
+  <footer class="footer-area section-gap" style="padding: 60px 0; background-color: #04091e; color: #fff;">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-5 col-md-6 col-sm-6">
+          <div class="single-footer-widget">
+            <h6 style="color: #fff; margin-bottom: 20px; font-weight: 600; text-transform: uppercase;">About Us</h6>
+            <p style="color: #777; font-size: 14px; line-height: 1.6;">
+              {{ restaurant?.description || 'Fresh ingredients, delicious taste, prepared with care.' }}
+            </p>
+            <p class="footer-text" style="color: #777; font-size: 14px; margin-top: 20px;">
+              Copyright &copy; {{ currentYear }} All rights reserved | {{ restaurant?.name || 'Grand Coffee Shop' }}
+            </p>
+          </div>
+        </div>
+        <div class="col-lg-2 col-md-6 col-sm-6 social-widget" style="margin-left: auto;">
+          <div class="single-footer-widget">
+            <h6 style="color: #fff; margin-bottom: 20px; font-weight: 600; text-transform: uppercase;">Follow Us</h6>
+            <p style="color: #777; font-size: 14px;">Let us be social</p>
+            <div class="footer-social d-flex align-items-center" style="gap: 15px; margin-top: 10px;">
+              <a href="javascript:void(0)" style="color: #777; transition: color 0.3s ease;"><i class="fa fa-facebook" style="font-size: 16px;"></i></a>
+              <a href="javascript:void(0)" style="color: #777; transition: color 0.3s ease;"><i class="fa fa-twitter" style="font-size: 16px;"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
 </div>

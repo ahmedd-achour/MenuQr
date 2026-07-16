@@ -1,218 +1,374 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, Inject, Renderer2 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
+import { Firestore, collection, query, where, getDocs, limit, doc, getDoc } from '@angular/fire/firestore';
+import { DOCUMENT } from '@angular/common';
+import { Subject, from, of } from 'rxjs';
+import { switchMap, takeUntil, catchError } from 'rxjs/operators';
+import { HeaderPartnerComponent } from "../header-partner/header-partner.component";
 
-interface Theme {
-  primaryColor?: string;
-  secondaryColor?: string;
-  background?: string;
-  cardColor?: string;
-  font?: string;
-  radius?: number;
+interface Restaurant {
+  id: string;
+  ownerId: string;
+  name?: string;
+  coverImage?: string;
+  description?: string;
   logo?: string;
-  cover?: string;
-  buttonStyle?: string;
-  darkMode?: boolean;
 }
 
-interface Category {
-  id: string;
-  name: string;
-  icon?: string;
-  active?: boolean;
-}
-
-interface MenuProduct {
-  id: string;
-  displayName: string;
-  displayDesc: string;
-  displayImage: string;
-  price: number;
+interface Product {
+  id?: string;
+  name?: string;
+  imageOverride?: string;
+  descriptionOverride?: string;
+  description?: string;
+  priceVariant?: number | string;
   categoryId?: string;
 }
 
-interface CartItem extends MenuProduct {
-  cartId: number;
+interface ThemeConfig {
+  restaurantId?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  font?: string;
+  darkMode?: boolean;
+  cardColor?: string;
+  background?: string;
 }
 
 @Component({
   selector: 'app-qr-code',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, HeaderPartnerComponent],
   templateUrl: './qr-code.component.html',
   styleUrls: ['./qr-code.component.css']
 })
-export class QrCodeComponent implements OnInit {
+export class QrCodeComponent implements OnInit, OnDestroy {
+  restaurantId: string | null = null;
+  restaurant: Restaurant | null = null;
+  products: Product[] = [];
+  theme: ThemeConfig | null = null;
+  loading = true;
+  errorMessage: string | null = null;
 
-  userId: string = '';
-  currentRestaurantId: string = '';
-  restaurantName = 'My Restaurant';
+  categories: any[] = [];
+  selectedCategoryId: string = 'all';
+  currentYear: number = new Date().getFullYear();
 
-  theme: Theme = {};
-  products: MenuProduct[] = [];
-  categories: Category[] = [];
-  filteredProducts: MenuProduct[] = [];
-  currentCategory = 'all';
+  // Debug Variables
+  showRawData = false;
+  routeParamsJson = '{}';
 
-  cart: CartItem[] = [];
-  cartOpen = false;
-  selectedProduct: MenuProduct | null = null;
-  isDark = false;
-  isLoading = true;
-  errorMessage = '';
-
-  private db: any;
-
-  constructor(private route: ActivatedRoute) {}
-
-  ngOnInit() {
-    this.userId = this.route.snapshot.paramMap.get('id') || '';
-
-    if (!this.userId) {
-      this.errorMessage = 'Missing user ID';
-      this.isLoading = false;
-      return;
+  get filteredProducts(): Product[] {
+    if (this.selectedCategoryId === 'all') {
+      return this.products;
     }
-
-    this.loadQRMenu();
+    return this.products.filter(p => p.categoryId === this.selectedCategoryId);
   }
 
-  private async loadQRMenu() {
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
+  selectCategory(categoryId: string): void {
+    this.selectedCategoryId = categoryId;
+  }
 
-    const app = initializeApp(firebaseConfig);
-    this.db = getFirestore(app);
+  // Safe Hex-Color Defaults
+  readonly defaultPrimaryColor: string = '#2f3542';
+  readonly defaultSecondaryColor: string = '#ff4757';
+  readonly defaultBackgroundColor: string = '#f7f9fb';
+  readonly defaultCardColor: string = '#ffffff';
 
+  private destroy$ = new Subject<void>();
+
+  constructor(
+    private route: ActivatedRoute,
+    private firestore: Firestore,
+    private renderer: Renderer2,
+    @Inject(DOCUMENT) private document: Document
+  ) {}
+
+  ngOnInit(): void {
+
+    this.route.paramMap.pipe(
+      switchMap(params => {
+        this.loading = true;
+        this.errorMessage = null;
+
+        // Save parameters stringified for our raw visual drawer
+        const keys = params.keys;
+        const paramMapObj: Record<string, string | null> = {};
+        keys.forEach(k => paramMapObj[k] = params.get(k));
+        this.routeParamsJson = JSON.stringify(paramMapObj, null, 2);
+
+        const ownerId = params.get('id');
+        if (!ownerId) {
+          throw new Error('Url Router Parameter ":id" is undefined. Please inspect your RouterModule setup.');
+        }
+
+        return from(this.fetchRestaurantData(ownerId)).pipe(
+          catchError(err => {
+            this.errorMessage = err?.message || 'Error processing backend requests.';
+            return of(null);
+          })
+        );
+      }),
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: () => {
+        this.loading = false;
+      },
+      error: (err) => {
+        this.errorMessage = `Fatal Stream Error: ${err?.message || err}`;
+        this.loading = false;
+      }
+    });
+  }
+
+
+
+  private async fetchRestaurantData(ownerId: string): Promise<void> {
     try {
-      // 1. Get currentRestaurantId from user
-      const userRef = doc(this.db, `users/${this.userId}`);
-      const userSnap = await getDoc(userRef);
+      let restaurantDocData: any = null;
+      let restaurantDocId = '';
 
-      if (userSnap.exists()) {
-        const userData = userSnap.data();
-        this.currentRestaurantId = userData['currentRestaurantId'];
-        this.restaurantName = userData['restaurantName'] || userData['fullName'] || 'My Restaurant';
+      // First try: Get user doc and look up currentRestaurantId
+      try {
+        const userDocRef = doc(this.firestore, `users/${ownerId}`);
+        const userSnap = await getDoc(userDocRef);
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          const currentRestaurantId = userData['currentRestaurantId'];
+          if (currentRestaurantId) {
+            const restDocRef = doc(this.firestore, `restaurants/${currentRestaurantId}`);
+            const restSnap = await getDoc(restDocRef);
+            if (restSnap.exists()) {
+              restaurantDocData = restSnap.data();
+              restaurantDocId = restSnap.id;
+              console.log('[QR Code] Resolved restaurant via user currentRestaurantId:', restaurantDocId);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('[QR Code] Failed resolving restaurant via user doc:', err);
       }
 
-      if (!this.currentRestaurantId) {
-        this.errorMessage = "No restaurant linked to this account";
+      // Second try: Query restaurants collection by ownerId
+      if (!restaurantDocData) {
+        const restaurantRef = collection(this.firestore, 'restaurants');
+        const restaurantQuery = query(restaurantRef, where('ownerId', '==', ownerId), limit(1));
+        const restaurantSnap = await getDocs(restaurantQuery);
+
+        if (!restaurantSnap.empty) {
+          const restaurantDoc = restaurantSnap.docs[0];
+          restaurantDocData = restaurantDoc.data();
+          restaurantDocId = restaurantDoc.id;
+          console.log('[QR Code] Resolved restaurant via ownerId query:', restaurantDocId);
+        }
+      }
+
+      if (!restaurantDocData) {
+        this.errorMessage = `Could not find a restaurant linked to user/owner ID "${ownerId}".`;
         return;
       }
 
-      // 2. Load data in parallel
-      await Promise.all([
-        this.loadTheme(),
-        this.loadCategories(),
-        this.loadProducts()
-      ]);
+      this.restaurant = {
+        id: restaurantDocData['id'] || restaurantDocId,
+        ownerId: restaurantDocData['ownerId'] || '',
+        name: restaurantDocData['businessName'] || restaurantDocData['name'] || 'Restaurant Loaded',
+        coverImage: restaurantDocData['coverImage'] || '',
+        description: restaurantDocData['description'] || '',
+        logo: restaurantDocData['logo'] || ''
+      };
 
-      this.filteredProducts = [...this.products];
+      this.restaurantId = this.restaurant.id;
 
-    } catch (err) {
-      console.error(err);
-      this.errorMessage = "Failed to load menu";
-    } finally {
-      this.isLoading = false;
+      if (this.restaurantId) {
+        await Promise.all([
+          this.fetchCategories().catch(e => console.warn(e)),
+          this.fetchProducts(this.restaurantId).catch(e => {
+            this.errorMessage = `Products Query Failed: ${e.message}`;
+          }),
+          this.fetchTheme(this.restaurantId).catch(e => {
+            this.errorMessage = `Themes Query Failed: ${e.message}`;
+          })
+        ]);
+      }
+    } catch (error: any) {
+      this.errorMessage = `Database query execution timed out or failed: ${error?.message || error}`;
+      throw error;
     }
   }
 
-  private async loadTheme() {
-    try {
-      const themeRef = doc(this.db, `themes/${this.currentRestaurantId}`);
-      const snap = await getDoc(themeRef);
-      if (snap.exists()) this.theme = snap.data() as Theme;
-    } catch (e) { console.warn(e); }
-  }
+   async fetchProducts(restaurantId: string): Promise<void> {
+  try {
+    const productsRef = collection(this.firestore, 'restaurant_products');
 
-  private async loadCategories() {
-    try {
-      const q = query(collection(this.db, "master_categories"), where("active", "==", true));
-      const snap = await getDocs(q);
-      this.categories = snap.docs.map(d => ({ id: d.id, ...d.data() } as Category));
-    } catch (e) { console.warn(e); }
-  }
+    // Fallback Query Array: We try checking 'id', 'restaurantId', and 'ownerId'
+    const queriesToTry = [
+      query(productsRef, where('id', '==', restaurantId)),
+      query(productsRef, where('restaurantId', '==', restaurantId)),
+      query(productsRef, where('ownerId', '==', restaurantId))
+    ];
 
-  private async loadProducts() {
-    try {
-      // Get restaurant specific products
-      const rpQuery = query(
-        collection(this.db, "restaurant_products"),
-        where("restaurantId", "==", this.currentRestaurantId)
-      );
-      const rpSnap = await getDocs(rpQuery);
+    console.log(`[Products Sync] Testing queries for restaurantId: ${restaurantId}`);
 
-      const restaurantProds = rpSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    let resolvedDocs: any[] = [];
 
-      // Get master products
-      const masterSnap = await getDocs(collection(this.db, "master_products"));
+    // Run queries in parallel to see which field is actually used in your DB
+    const snapshots = await Promise.all(queriesToTry.map(q => getDocs(q)));
+
+    // Find the first query that actually yields products
+    for (let i = 0; i < snapshots.length; i++) {
+      const snap = snapshots[i];
+      if (!snap.empty) {
+        console.log(`[Products Sync] Success! Query option #${i + 1} found ${snap.docs.length} products.`);
+        resolvedDocs = snap.docs;
+        break; // Stop at the first successful match
+      }
+    }
+
+    let restaurantProds = resolvedDocs.map(d => {
+      const data = d.data() || {};
+      return {
+        id: d.id,
+        ...data
+      };
+    });
+
+    // Only display visible products
+    restaurantProds = restaurantProds.filter((rp: any) => rp.visible !== false);
+
+    if (restaurantProds.length > 0) {
+      // Fetch all master products so we can merge their details (name, image, description)
+      const masterRef = collection(this.firestore, 'master_products');
+      const masterSnap = await getDocs(masterRef);
       const mastersMap = new Map(masterSnap.docs.map(d => [d.id, d.data()]));
 
       this.products = restaurantProds.map((rp: any) => {
-        const master = mastersMap.get(rp.masterProductId) || {};
-
+        const master: any = mastersMap.get(rp.masterProductId) || {};
         return {
           id: rp.id,
-          displayName: rp.nameOverride || master['name'] || 'Product',
-          displayDesc: rp.descriptionOverride || master['description'] || '',
-          displayImage: rp.imageOverride || master['image'] || 'https://picsum.photos/id/201/600/400',
-          price: rp.priceVariant || 12.99,
-          categoryId: master['categoryId']
-        } as MenuProduct;
+          name: rp.nameSnapshot || master['name'] || 'Unnamed Product',
+          imageOverride: rp.imageOverride || master['image'] || 'assets/placeholder-food.png',
+          descriptionOverride: rp.descriptionOverride || '',
+          description: master['description'] || '',
+          priceVariant: rp.priceVariant ?? master['price'] ?? '0',
+          categoryId: master['categoryId'] || ''
+        };
       });
+      console.log(`[Products Sync] Successfully loaded and mapped ${this.products.length} products.`);
+    } else {
+      console.warn(`[Products Sync] All fallback fields ('id', 'restaurantId', 'ownerId') returned 0 products for: ${restaurantId}`);
+      this.products = [];
+    }
+
+  } catch (error: any) {
+    console.error('[Products Sync] Failed to execute products fetch:', error);
+    this.errorMessage = `Products Fetch Error: ${error?.message || error}`;
+  }
+}
+  private async fetchCategories(): Promise<void> {
+    try {
+      const categoriesRef = collection(this.firestore, 'master_categories');
+      const categoriesQuery = query(categoriesRef, where('active', '==', true));
+      const snap = await getDocs(categoriesQuery);
+      this.categories = snap.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          name: data['name'],
+          icon: data['icon'] || '',
+          order: data['order'] !== undefined ? data['order'] : 99
+        };
+      }).sort((a, b) => a.order - b.order);
     } catch (e) {
-      console.error("Products loading error", e);
+      console.warn('[QR Code] Failed to fetch categories:', e);
+    }
+  }
+  private async fetchTheme(restaurantId: string): Promise<void> {
+    try {
+      const themeDocRef = doc(this.firestore, `themes/theme_${restaurantId}`);
+      const themeSnap = await getDoc(themeDocRef);
+
+      if (themeSnap.exists()) {
+        const data = themeSnap.data() || {};
+        this.theme = {
+          restaurantId: data['restaurantId'] || restaurantId,
+          primaryColor: data['primaryColor'] || '',
+          secondaryColor: data['secondaryColor'] || '',
+          font: data['font'] || 'inherit',
+          darkMode: !!data['darkMode'],
+          cardColor: data['cardColor'] || '',
+          background: data['background'] || ''
+        };
+      } else {
+        // Fallback to checking via query just in case it was saved under another ID
+        const themesRef = collection(this.firestore, 'themes');
+        const themeQuery = query(themesRef, where('restaurantId', '==', restaurantId), limit(1));
+        const themeSnapQuery = await getDocs(themeQuery);
+
+        if (!themeSnapQuery.empty) {
+          const data = themeSnapQuery.docs[0].data() || {};
+          this.theme = {
+            restaurantId: data['restaurantId'] || restaurantId,
+            primaryColor: data['primaryColor'] || '',
+            secondaryColor: data['secondaryColor'] || '',
+            font: data['font'] || 'inherit',
+            darkMode: !!data['darkMode'],
+            cardColor: data['cardColor'] || '',
+            background: data['background'] || ''
+          };
+        } else {
+          this.theme = {};
+        }
+      }
+    } catch (e: any) {
+      console.warn('[QR Code] Failed to fetch theme:', e);
+      this.theme = {};
+    }
+
+    this.applyDynamicTheme(this.theme);
+  }
+
+  private applyDynamicTheme(theme: ThemeConfig | null): void {
+    try {
+      const root = this.document?.documentElement;
+      if (!root) return;
+
+      const primary = (theme?.primaryColor && typeof theme.primaryColor === 'string' && theme.primaryColor.startsWith('#'))
+        ? theme.primaryColor
+        : this.defaultPrimaryColor;
+
+      const secondary = (theme?.secondaryColor && typeof theme.secondaryColor === 'string' && theme.secondaryColor.startsWith('#'))
+        ? theme.secondaryColor
+        : this.defaultSecondaryColor;
+
+      const background = (theme?.background && typeof theme.background === 'string' && theme.background.startsWith('#'))
+        ? theme.background
+        : this.defaultBackgroundColor;
+
+      const card = (theme?.cardColor && typeof theme.cardColor === 'string' && theme.cardColor.startsWith('#'))
+        ? theme.cardColor
+        : this.defaultCardColor;
+
+      const font = theme?.font || 'inherit';
+
+      this.renderer.setStyle(root, '--primary-color', primary);
+      this.renderer.setStyle(root, '--secondary-color', secondary);
+      this.renderer.setStyle(root, '--background-color', background);
+      this.renderer.setStyle(root, '--card-color', card);
+      this.renderer.setStyle(root, '--font-family', font);
+
+      if (theme?.darkMode) {
+        this.renderer.addClass(this.document.body, 'dark-theme');
+      } else {
+        this.renderer.removeClass(this.document.body, 'dark-theme');
+      }
+    } catch (error) {
+      console.error('[QR Component] Style assignment failed:', error);
     }
   }
 
-  filterByCategory(catId: string) {
-    this.currentCategory = catId;
-    this.filteredProducts = catId === 'all'
-      ? [...this.products]
-      : this.products.filter(p => p.categoryId === catId);
-  }
-
-  openProductModal(product: MenuProduct) {
-    this.selectedProduct = product;
-  }
-
-  closeModal() {
-    this.selectedProduct = null;
-  }
-
-  addToCart(event: any, product: MenuProduct) {
-    if (event) event.stopImmediatePropagation();
-    this.cart.push({ ...product, cartId: Date.now() });
-  }
-
-  removeFromCart(index: number) {
-    this.cart.splice(index, 1);
-  }
-
-  toggleCart() {
-    this.cartOpen = !this.cartOpen;
-  }
-
-  get cartTotal(): number {
-    return this.cart.reduce((sum, item) => sum + (item.price || 0), 0);
-  }
-
-  checkout() {
-    alert('Thank you! (Demo Checkout)');
-    this.cart = [];
-    this.cartOpen = false;
-  }
-
-  toggleDarkMode() {
-    this.isDark = !this.isDark;
-    document.documentElement.classList.toggle('dark', this.isDark);
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
