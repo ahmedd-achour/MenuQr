@@ -6,6 +6,7 @@ import { DOCUMENT } from '@angular/common';
 import { Subject, from, of } from 'rxjs';
 import { switchMap, takeUntil, catchError } from 'rxjs/operators';
 import { HeaderPartnerComponent } from "../header-partner/header-partner.component";
+import { MenuService } from '../services/menu.service';
 
 interface Restaurant {
   id: string;
@@ -34,6 +35,7 @@ interface ThemeConfig {
   darkMode?: boolean;
   cardColor?: string;
   background?: string;
+  radius?: number;
 }
 
 @Component({
@@ -67,15 +69,21 @@ export class QrCodeComponent implements OnInit, OnDestroy {
     return this.products.filter(p => p.categoryId === this.selectedCategoryId);
   }
 
+  get activeCategories(): any[] {
+    return this.categories.filter(cat => 
+      this.products.some(p => p.categoryId === cat.id)
+    );
+  }
+
   selectCategory(categoryId: string): void {
     this.selectedCategoryId = categoryId;
   }
 
   // Safe Hex-Color Defaults
-  readonly defaultPrimaryColor: string = '#2f3542';
-  readonly defaultSecondaryColor: string = '#ff4757';
-  readonly defaultBackgroundColor: string = '#f7f9fb';
-  readonly defaultCardColor: string = '#ffffff';
+  readonly defaultPrimaryColor: string = '#d97706';
+  readonly defaultSecondaryColor: string = '#78350f';
+  readonly defaultBackgroundColor: string = '#ffffff';
+  readonly defaultCardColor: string = '#f8fafc';
 
   private destroy$ = new Subject<void>();
 
@@ -83,7 +91,8 @@ export class QrCodeComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private firestore: Firestore,
     private renderer: Renderer2,
-    @Inject(DOCUMENT) private document: Document
+    @Inject(DOCUMENT) private document: Document,
+    private menuService: MenuService
   ) {}
 
   ngOnInit(): void {
@@ -199,11 +208,48 @@ export class QrCodeComponent implements OnInit, OnDestroy {
 
     // Load menu + theme only if access is granted
     if (this.restaurantId && this.hasAccess) {
-      await Promise.all([
-        this.fetchCategories().catch(e => console.warn(e)),
-        this.fetchProducts(this.restaurantId).catch(e => console.error(e)),
-        this.fetchTheme(this.restaurantId).catch(e => console.error(e))
-      ]);
+      // Try to fetch the consolidated published menu document (1 read instead of dozens!)
+      console.log(`[QR Code] Fetching published menu for: ${this.restaurantId}`);
+      const publishedMenu = await this.menuService.getPublishedMenu(this.restaurantId).catch(err => {
+        console.warn('[QR Code] Failed to fetch published menu:', err);
+        return null;
+      });
+
+      if (publishedMenu) {
+        console.log('[QR Code] Success! Loaded compiled published menu.');
+        this.categories = (publishedMenu.categories || []).map((cat: any) => ({
+          id: cat.id,
+          name: cat.name,
+          icon: cat.icon || '',
+          order: cat.order !== undefined ? cat.order : 99
+        })).sort((a, b) => a.order - b.order);
+
+        this.products = (publishedMenu.products || []).map((prod: any) => ({
+          id: prod.id,
+          name: prod.name,
+          imageOverride: prod.image,
+          descriptionOverride: prod.descriptionOverride || '',
+          description: prod.description || '',
+          priceVariant: prod.price ?? '0',
+          categoryId: prod.categoryId || ''
+        }));
+
+        this.theme = publishedMenu.theme || {};
+        this.applyDynamicTheme(this.theme);
+      } else {
+        // Fallback to separate queries if published menu does not exist
+        console.warn('[QR Code] Published menu not found. Falling back to multi-document queries...');
+        await Promise.all([
+          this.fetchCategories().catch(e => console.warn(e)),
+          this.fetchProducts(this.restaurantId).catch(e => console.error(e)),
+          this.fetchTheme(this.restaurantId).catch(e => console.error(e))
+        ]);
+
+        // Proactively compile & publish menu in background for future visits
+        this.menuService.publishMenu(this.restaurantId).catch(err => {
+          console.warn('[QR Code] Background compile and publish failed:', err);
+        });
+      }
     }
 
   } catch (error: any) {
@@ -337,7 +383,8 @@ private checkUserAccess(userData: any): boolean {
           font: data['font'] || 'inherit',
           darkMode: !!data['darkMode'],
           cardColor: data['cardColor'] || '',
-          background: data['background'] || ''
+          background: data['background'] || '',
+          radius: data['radius'] !== undefined ? Number(data['radius']) : 10
         };
       } else {
         // Fallback to checking via query just in case it was saved under another ID
@@ -354,7 +401,8 @@ private checkUserAccess(userData: any): boolean {
             font: data['font'] || 'inherit',
             darkMode: !!data['darkMode'],
             cardColor: data['cardColor'] || '',
-            background: data['background'] || ''
+            background: data['background'] || '',
+            radius: data['radius'] !== undefined ? Number(data['radius']) : 10
           };
         } else {
           this.theme = {};
@@ -396,6 +444,9 @@ private checkUserAccess(userData: any): boolean {
       this.renderer.setStyle(root, '--background-color', background);
       this.renderer.setStyle(root, '--card-color', card);
       this.renderer.setStyle(root, '--font-family', font);
+
+      const radius = theme?.radius !== undefined ? `${theme.radius}px` : '10px';
+      this.renderer.setStyle(root, '--border-radius', radius);
 
       if (theme?.darkMode) {
         this.renderer.addClass(this.document.body, 'dark-theme');

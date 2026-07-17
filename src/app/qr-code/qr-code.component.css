@@ -2,12 +2,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 .qr-menu-wrapper {
-  font-family: var(--font-family, 'Poppins', sans-serif);
-  background-color: var(--background-color, #f9f9ff);
-  color: var(--primary-color, #222222);
+  font-family: var(--font-family, 'Poppins', sans-serif) !important;
+  background-color: var(--background-color, #f9f9ff) !important;
+  color: var(--primary-color, #222222) !important;
   min-height: 100vh;
   padding-top: 80px;
   box-sizing: border-box;
+}
+
+.qr-menu-wrapper .menu-area {
+  background-color: transparent !important;
 }
 
 /* Header style override for Fixed navigation */
@@ -64,9 +68,20 @@
   font-size: 3.5rem;
   font-weight: 700;
   line-height: 1.15;
-  margin-top: 15px;
+  margin-top: 10px;
   margin-bottom: 20px;
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.restaurant-logo {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 4px solid var(--secondary-color, #b68834);
+  object-fit: cover;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  margin-bottom: 15px;
+  background-color: #ffffff;
 }
 
 .banner-content h6 {
@@ -100,11 +115,11 @@
 }
 
 .category-chip {
-  background: var(--card-color, #ffffff);
-  border: 1px solid var(--secondary-color, #b68834);
-  color: var(--secondary-color, #b68834);
+  background: var(--card-color, #ffffff) !important;
+  border: 1px solid var(--secondary-color, #b68834) !important;
+  color: var(--secondary-color, #b68834) !important;
   padding: 10px 24px;
-  border-radius: 30px;
+  border-radius: calc(var(--border-radius, 10px) * 2.5);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -115,20 +130,20 @@
 
 .category-chip:hover,
 .category-chip.active {
-  background: var(--secondary-color, #b68834);
-  color: #ffffff;
-  box-shadow: 0 10px 20px rgba(182, 136, 52, 0.25);
+  background: var(--secondary-color, #b68834) !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 20px rgba(182, 136, 52, 0.25) !important;
 }
 
 /* Single Menu Card */
 .single-menu {
-  background-color: var(--card-color, #ffffff);
-  box-shadow: 0px 10px 30px 0px rgba(182, 136, 52, 0.15);
-  border-radius: 10px;
+  background-color: var(--card-color, #ffffff) !important;
+  box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.05) !important;
+  border-radius: var(--border-radius, 10px) !important;
   padding: 20px;
   margin-bottom: 30px;
   transition: all 0.3s ease;
-  border: 1px solid rgba(182, 136, 52, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
 }
 
 .single-menu:hover {
@@ -138,7 +153,7 @@
 
 .product-img-wrapper {
   margin-bottom: 20px;
-  border-radius: 8px;
+  border-radius: calc(var(--border-radius, 10px) - 2px);
   overflow: hidden;
   height: 200px;
   position: relative;
@@ -166,12 +181,12 @@
 .single-menu h4 {
   font-size: 1.15rem;
   font-weight: 700;
-  color: var(--primary-color, #222222);
+  color: var(--primary-color, #222222) !important;
   margin: 0;
 }
 
 .single-menu .price {
-  color: var(--secondary-color, #b68834);
+  color: var(--secondary-color, #b68834) !important;
   font-size: 18px;
   font-weight: 600;
   margin: 0;

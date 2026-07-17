@@ -1,166 +1,388 @@
 <app-header-partner [userId]="userId"></app-header-partner>
 
-<div class="partners-dashboard py-5" style="background-color: #fcf9f4; min-height: 100vh;">
-  <div class="container-fluid px-md-5 px-3">
+<div class="partners-dashboard py-5">
+  <div class="container-xl px-4">
 
-    <!-- Toast -->
-    <div *ngIf="notificationMessage" class="alert-toast shadow p-3 mb-4 d-flex align-items-center justify-content-between"
+    <!-- Toast Notifications -->
+    <div *ngIf="notificationMessage" class="alert-toast shadow-lg p-3 mb-4 d-flex align-items-center justify-content-between animate-toast"
          [ngClass]="isError ? 'toast-err' : 'toast-success'">
       <div class="d-flex align-items-center">
-        <i class="fa mr-3" [ngClass]="isError ? 'fa-exclamation-triangle' : 'fa-check-circle'"></i>
-        <span>{{ notificationMessage }}</span>
+        <i class="fa mr-3 text-lg" [ngClass]="isError ? 'fa-exclamation-triangle' : 'fa-check-circle'"></i>
+        <span class="font-weight-bold">{{ notificationMessage }}</span>
       </div>
-      <button (click)="notificationMessage = ''" class="btn-close">*</button>
+      <button (click)="notificationMessage = ''" class="btn-close-toast">&times;</button>
     </div>
 
-    <!-- Header -->
-    <div class="text-center mb-5">
-      <h3 class="fw-bold" style="color: #111;">{{ restaurantData.businessName || 'Mon Établissement' }}</h3>
+    <!-- Loading State -->
+    <div *ngIf="!userProfile" class="d-flex flex-column align-items-center justify-content-center py-5">
+      <div class="spinner-grow text-primary" role="status" style="width: 3rem; height: 3rem;">
+        <span class="sr-only">Chargement...</span>
+      </div>
+      <p class="text-muted mt-3">Chargement des données de votre tableau de bord...</p>
     </div>
 
-    <div class="row g-4">
+    <!-- Dashboard Content -->
+    <div *ngIf="userProfile" class="dashboard-content-grid">
 
-      <!-- Left Column: Branding -->
-      <div class="col-lg-4">
-        <div class="dashboard-card p-0 overflow-hidden bg-white border bo-rad-10 h-100">
-          <!-- Cover -->
-          <div class="preview-cover-banner position-relative"
-          [style.backgroundImage]="'url(' + (restaurantData.coverImage || 'assets/teste.jpg') + ')'">
-            <div class="uploader-overlay" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
-              <i class="fa fa-camera text-white fa-2x"></i>
-              <input title="jk"  type="file" (change)="uploadMedia($event, 'coverImage')" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;">
-            </div>
+      <!-- Left side: Live Preview & QR Section -->
+      <div class="sidebar-column">
+
+        <!-- Interactive Live Preview Phone Mockup -->
+        <div class="preview-card-wrapper mb-4">
+          <div class="card-header-premium">
+            <h5 class="m-0"><i class="fa fa-mobile-phone mr-2"></i>Aperçu en Direct (Mobile)</h5>
+            <span class="badge badge-live">Live</span>
           </div>
 
-          <!-- Logo -->
-          <div class="text-center" style="margin-top: -55px; z-index: 10; position: relative;">
-            <div class="preview-logo-wrapper mx-auto"
-                 [style.backgroundImage]="'url(' + (restaurantData.logo || 'assets/logo.png') + ')'">
-              <div class="uploader-overlay rounded-circle" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
-                <i class="fa fa-pencil text-white"></i>
-                <input title="jk"  type="file" (change)="uploadMedia($event, 'logo')" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;">
+          <div class="mock-phone-container mx-auto">
+            <div class="phone-screen" [class.dark-theme]="themeData.darkMode"
+                 [style.--primary-color]="themeData.primaryColor || '#222222'"
+                 [style.--secondary-color]="themeData.secondaryColor || '#b68834'"
+                 [style.--background-color]="themeData.background || '#f9f9ff'"
+                 [style.--card-color]="themeData.cardColor || '#ffffff'"
+                 [style.--border-radius.px]="themeData.radius !== undefined ? themeData.radius : 10"
+                 [style.--font-family]="themeData.font || 'Outfit'">
+
+              <!-- Banner/Hero Section -->
+              <div class="phone-banner"
+                   [style.backgroundImage]="restaurantData.coverImage ?
+                     'linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.7)), url(' + restaurantData.coverImage + ')' :
+                     'linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.7)), url(assets/teste.jpg)'">
+                <div class="uploader-overlay" title="Changer l'image de couverture">
+                  <i class="fa fa-camera"></i>
+                  <input title="gh" type="file" (change)="uploadMedia($event, 'coverImage')" accept="image/*">
+                </div>
+
+                <!-- Floating content matching the public QR Code design -->
+                <div class="phone-banner-content text-center px-2">
+                  <div class="phone-logo-container mb-2" *ngIf="restaurantData.logo">
+                    <div class="phone-logo" [style.backgroundImage]="'url(' + restaurantData.logo + ')'">
+                      <div class="uploader-overlay-circle" title="Changer le logo">
+                        <i class="fa fa-pencil"></i>
+                        <input title="gh" type="file" (change)="uploadMedia($event, 'logo')" accept="image/*">
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Case when logo is not set, still provide pencil uploader -->
+                  <div class="phone-logo-container mb-2" *ngIf="!restaurantData.logo">
+                    <div class="phone-logo-placeholder mx-auto">
+                      <i class="fa fa-plus text-white"></i>
+                      <input title="gh" type="file" (change)="uploadMedia($event, 'logo')" accept="image/*">
+                    </div>
+                  </div>
+
+                  <h6 class="text-white text-uppercase" style="font-size: 7px; letter-spacing: 1px; margin-bottom: 2px; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">Now you can taste the quality</h6>
+                  <h1 style="font-size: 14px; font-weight: 700; margin: 0; line-height: 1.2; color: #ffffff; text-shadow: 1px 1px 4px rgba(0,0,0,0.8);">{{ restaurantData.businessName || 'Nom du Restaurant' }}</h1>
+                  <p class="text-white" style="font-size: 9px; opacity: 0.9; margin: 4px 0 0 0; line-height: 1.3; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">
+                    {{ restaurantData.description || 'Start your day with a delicious meal and freshly brewed coffee.' | slice:0:60 }}{{ (restaurantData.description?.length || 0) > 60 ? '...' : '' }}
+                  </p>
+                </div>
               </div>
+
+              <!-- Main Menu Area inside Mock Phone -->
+              <div class="phone-menu-area py-3" [style.backgroundColor]="themeData.background || '#f9f9ff'">
+                <div class="text-center px-2 mb-3">
+                  <h2 style="font-size: 11px; font-weight: 700; color: var(--primary-color, #222222); margin-bottom: 2px;">
+                    it's all for you , You order - We serve
+                  </h2>
+                  <p class="text-muted" style="font-size: 8px; margin: 0;">Fresh ingredients, delicious taste, prepared with care.</p>
+                </div>
+
+                <!-- Categories Filter Chips -->
+                <div class="phone-categories-wrapper px-2">
+                  <div class="phone-categories-container">
+                    <div class="phone-category-chip"
+                         [class.active]="selectedCategoryId === 'all'"
+                         (click)="selectedCategoryId = 'all'">
+                      All
+                    </div>
+                    <div *ngFor="let cat of activeCategories"
+                         class="phone-category-chip"
+                         [class.active]="selectedCategoryId === cat.id"
+                         (click)="selectedCategoryId = cat.id">
+                      {{ cat.name }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Products Grid -->
+                <div class="phone-products-container px-2 mt-3">
+                  <div *ngIf="filteredPreviewProducts.length === 0" class="text-center py-4">
+                    <span style="font-size: 1.5rem;">🍽️</span>
+                    <p class="text-muted mt-1" style="font-size: 9px;">Aucun produit</p>
+                  </div>
+
+                  <div *ngFor="let product of filteredPreviewProducts" class="phone-single-menu mb-3">
+                    <div class="phone-product-img-wrapper">
+                      <img [src]="product?.image || 'assets/placeholder-food.png'" alt="{{ product?.name }}">
+                    </div>
+                    <div class="phone-title-div d-flex justify-content-between align-items-center">
+                      <h4 class="phone-product-name m-0">{{ product?.name }}</h4>
+                      <span class="phone-product-price">
+                        {{ product?.price }}<span style="font-size: 0.6rem; font-weight: 500;"> DT</span>
+                      </span>
+                    </div>
+                    <p class="phone-product-desc mt-1 mb-0">
+                      {{ product?.description || 'No description available.' }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
 
-          <div class="p-4 text-center">
-            <h5 class="fw-bold">{{ restaurantData.businessName }}</h5>
-            <p class="text-muted">{{ restaurantData.city }}</p>
+          <div class="p-3 text-center bg-light-soft border-top">
+            <span class="text-xs text-muted"><i class="fa fa-info-circle mr-1"></i>Passez la souris sur les images du téléphone pour les modifier.</span>
           </div>
-           <div class="mt-5 text-center">
-      <h4>Votre QR Code Menu</h4>
-
-
-
-
-      <div class="d-inline-block p-4 bg-white shadow rounded-4">
-        <img [src]="'https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=https://menuqr-cu5.pages.dev/admin-panel/'+userId+'/qr-code'" alt="QR">
-        <br>
-        <button (click)="downloadQRCode()" class="btn btn-dark mt-3 px-4">Télécharger QR Code</button>
-      </div>
-    </div>
-
-
-<!-- QR Preview Link -->
         </div>
+
+        <!-- Elegant QR Code Card -->
+        <div class="qr-card-premium text-center p-4">
+          <div class="qr-card-header mb-3">
+            <h5 class="m-0"><i class="fa fa-qrcode mr-2"></i>Votre QR Code Menu</h5>
+            <p class="text-muted small mt-1">Généré automatiquement pour votre restaurant</p>
+          </div>
+
+          <div class="qr-code-display-frame mb-3">
+            <img [src]="'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://menuqr-cu5.pages.dev/admin-panel/'+userId+'/qr-code'" alt="QR Code Menu">
+          </div>
+
+          <div class="px-2">
+            <button (click)="downloadQRCode()" class="btn-qr-download w-100">
+              <i class="fa fa-download mr-2"></i>Télécharger le QR Code
+            </button>
+            <a [href]="'/admin-panel/' + userId + '/qr-code'" target="_blank" class="btn-qr-preview w-100 mt-2">
+              <i class="fa fa-external-link mr-2"></i>Voir le menu en ligne
+            </a>
+          </div>
+        </div>
+
       </div>
 
-      <!-- Right Column: Settings -->
-      <div class="col-lg-8">
-        <div class="dashboard-card p-5 bg-white border bo-rad-10">
+      <!-- Right side: Control Settings Panel -->
+      <div class="settings-column">
 
-          <!-- Contact Info -->
-          <div class="mb-5">
-            <h4 class="form-group-title">Coordonnées</h4>
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label">Email</label>
-                <input  title="jk" type="email" class="form-control custom-input" [(ngModel)]="userProfile!.email" name="email" readonly>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Téléphone</label>
-                <input type="tel" class="form-control custom-input" [(ngModel)]="userProfile!.phone" name="phone" placeholder="+216 XX XXX XXX">
-              </div>
-            </div>
+        <div class="dashboard-form-card p-4 p-md-5">
+          <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom">
+            <h3 class="m-0 font-weight-bold text-dark-blue">Configuration</h3>
+            <span class="status-badge" [class.badge-trial]="restaurantData.status === 'trial'">
+              {{ restaurantData.status === 'trial' ? 'Période d\'essai' : 'Abonnement Actif' }}
+            </span>
           </div>
 
-          <!-- Restaurant Info -->
-          <div class="mb-5">
-            <h4 class="form-group-title">Informations de l'Établissement</h4>
-            <div class="row g-3">
-              <div class="col-12">
-                <label class="form-label">Nom Commercial</label>
-                <input title="jk" type="text" class="form-control custom-input" [(ngModel)]="restaurantData.businessName" name="businessName">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Ville</label>
-                <input  title="jk" type="text" class="form-control custom-input" [(ngModel)]="restaurantData.city" name="city">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Adresse</label>
-                <input title="jk"  type="text" class="form-control custom-input" [(ngModel)]="restaurantData.address" name="address">
-              </div>
-              <div class="col-12">
-                <label class="form-label">Description</label>
-                <textarea title="jk"  class="form-control custom-textarea" rows="3" [(ngModel)]="restaurantData.description" name="description"></textarea>
-              </div>
+          <!-- Section: Contacts -->
+          <div class="settings-section mb-5">
+            <div class="section-title">
+              <span class="step-num">1</span>
+              <h5>Coordonnées Commerciales</h5>
             </div>
-          </div>
-
-          <!-- Theme -->
-          <div class="mb-5">
-            <h4 class="form-group-title">Thème</h4>
-            <div class="row g-3">
+            <div class="row g-4">
               <div class="col-md-6">
-                <label class="form-label">Couleur Primaire</label>
-                <input title="jk"  type="color" [(ngModel)]="themeData.primaryColor" name="primaryColor" class="form-control form-control-color w-100">
+                <label class="form-label-premium">Email du propriétaire</label>
+                <div class="input-icon-group">
+                  <i class="fa fa-envelope input-icon"></i>
+                  <input type="email" class="form-control-premium" [value]="userProfile.email" readonly title="Email non modifiable">
+                </div>
               </div>
               <div class="col-md-6">
-                <label class="form-label">Couleur Secondaire</label>
-                <input  title="jk"  type="color" [(ngModel)]="themeData.secondaryColor" name="secondaryColor" class="form-control form-control-color w-100">
-              </div>
-              <div class="col-12">
-                <div class="form-check form-switch mt-3">
-                  <input  title="jk"  class="form-check-input" type="checkbox" [(ngModel)]="themeData.darkMode" name="darkMode">
-                  <label class="form-check-label">Mode Sombre</label>
+                <label class="form-label-premium">Téléphone de contact</label>
+                <div class="input-icon-group">
+                  <i class="fa fa-phone input-icon"></i>
+                  <input type="tel" class="form-control-premium" [(ngModel)]="userProfile.phone" placeholder="+216 XX XXX XXX">
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="text-end">
-            <button type="button" (click)="onSave()" [disabled]="isSaving" class="btn btn-save px-5 py-3">
-              {{ isSaving ? 'Enregistrement...' : 'Sauvegarder tout' }}
+          <!-- Section: Restaurant Details -->
+          <div class="settings-section mb-5">
+            <div class="section-title">
+              <span class="step-num">2</span>
+              <h5>Informations de l'Établissement</h5>
+            </div>
+            <div class="row g-4">
+              <div class="col-12">
+                <label class="form-label-premium">Nom Commercial</label>
+                <div class="input-icon-group">
+                  <i class="fa fa-building-o input-icon"></i>
+                  <input type="text" class="form-control-premium" [(ngModel)]="restaurantData.businessName" placeholder="Ex. Café Central">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label-premium">Ville</label>
+                <div class="input-icon-group">
+                  <i class="fa fa-map input-icon"></i>
+                  <input type="text" class="form-control-premium" [(ngModel)]="restaurantData.city" placeholder="Ex. Tunis">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label-premium">Adresse Complète</label>
+                <div class="input-icon-group">
+                  <i class="fa fa-map-marker input-icon"></i>
+                  <input type="text" class="form-control-premium" [(ngModel)]="restaurantData.address" placeholder="Ex. Avenue Habib Bourguiba">
+                </div>
+              </div>
+              <div class="col-12">
+                <label class="form-label-premium">Description & Slogan</label>
+                <textarea class="form-control-premium textarea-premium" rows="3" [(ngModel)]="restaurantData.description" placeholder="Présentez votre restaurant, vos spécialités et vos horaires de service..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Theme & Styles -->
+          <div class="settings-section mb-5">
+            <div class="section-title">
+              <span class="step-num">3</span>
+              <h5>Personnalisation Visuelle (Thème)</h5>
+            </div>
+            <div class="row g-4">
+              <!-- Colors Row 1 -->
+              <div class="col-md-6">
+                <label class="form-label-premium d-flex align-items-center justify-content-between">
+                  <span>Couleur Primaire</span>
+                  <span class="color-hex-label">{{ themeData.primaryColor }}</span>
+                </label>
+                <div class="color-picker-wrapper">
+                  <input type="color" [(ngModel)]="themeData.primaryColor" class="color-picker-input">
+                  <div class="color-picker-mask" [style.backgroundColor]="themeData.primaryColor"></div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label-premium d-flex align-items-center justify-content-between">
+                  <span>Couleur Secondaire</span>
+                  <span class="color-hex-label">{{ themeData.secondaryColor }}</span>
+                </label>
+                <div class="color-picker-wrapper">
+                  <input type="color" [(ngModel)]="themeData.secondaryColor" class="color-picker-input">
+                  <div class="color-picker-mask" [style.backgroundColor]="themeData.secondaryColor"></div>
+                </div>
+              </div>
+
+              <!-- Colors Row 2 -->
+              <div class="col-md-6">
+                <label class="form-label-premium d-flex align-items-center justify-content-between">
+                  <span>Arrière-plan Menu</span>
+                  <span class="color-hex-label">{{ themeData.background }}</span>
+                </label>
+                <div class="color-picker-wrapper">
+                  <input type="color" [(ngModel)]="themeData.background" class="color-picker-input">
+                  <div class="color-picker-mask" [style.backgroundColor]="themeData.background"></div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label-premium d-flex align-items-center justify-content-between">
+                  <span>Arrière-plan Cartes</span>
+                  <span class="color-hex-label">{{ themeData.cardColor }}</span>
+                </label>
+                <div class="color-picker-wrapper">
+                  <input type="color" [(ngModel)]="themeData.cardColor" class="color-picker-input">
+                  <div class="color-picker-mask" [style.backgroundColor]="themeData.cardColor"></div>
+                </div>
+              </div>
+
+              <!-- Typography & Border Radius -->
+              <div class="col-md-6">
+                <label class="form-label-premium">Police d'écriture</label>
+                <div class="input-icon-group select-container">
+                  <i class="fa fa-font input-icon"></i>
+                  <select [(ngModel)]="themeData.font" class="form-control-premium select-premium">
+                    <option value="Poppins">Poppins (Moderne)</option>
+                    <option value="Outfit">Outfit (Elégant)</option>
+                    <option value="Playfair Display">Playfair Display (Classique)</option>
+                    <option value="Montserrat">Montserrat (Minimaliste)</option>
+                    <option value="Courgette">Courgette (Manuscrit)</option>
+                    <option value="Inter">Inter (Technique)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label-premium">Bordure Arrondie (px)</label>
+                <div class="input-icon-group">
+                  <i class="fa fa-dot-circle-o input-icon"></i>
+                  <input type="number" class="form-control-premium" [(ngModel)]="themeData.radius" min="0" max="30" placeholder="10">
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="switch-card d-flex align-items-center justify-content-between p-3">
+                  <div class="switch-info">
+                    <span class="d-block font-weight-bold text-dark">Mode Sombre (Dark Mode)</span>
+                    <span class="text-muted text-xs">Activez un affichage sombre élégant pour les clients de nuit</span>
+                  </div>
+                  <label class="premium-switch">
+                    <input type="checkbox" [(ngModel)]="themeData.darkMode">
+                    <span class="switch-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Save Button -->
+          <div class="border-top pt-4 text-end">
+            <button type="button" (click)="onSave()" [disabled]="isSaving" class="btn-save-premium">
+              <span *ngIf="!isSaving"><i class="fa fa-save mr-2"></i>Sauvegarder tout & Publier le menu</span>
+              <span *ngIf="isSaving"><i class="fa fa-spinner fa-spin mr-2"></i>Publication en cours...</span>
             </button>
           </div>
         </div>
+
       </div>
+
     </div>
 
-    <!-- Active Menu Products -->
-    <div class="mt-5">
-      <h4 class="text-center mb-4">Votre Menu Actif ({{ addedProducts.length }} produits)</h4>
-      <div class="row">
-        <div class="col-md-6 col-lg-4 col-xl-3 mb-4" *ngFor="let p of addedProducts">
-          <div class="card h-100 border-0 shadow-sm">
-            <img  alt="hu"  [src]="p.image || 'assets/placeholder-food.png'" class="card-img-top" style="height: 160px; object-fit: cover;">
-            <div class="card-body">
-              <h6 class="card-title">{{ p.name }}</h6>
-              <p class="text-muted small">{{ p.description | slice:0:80 }}...</p>
-              <div class="d-flex justify-content-between align-items-center">
-                <span class="fw-bold">{{ p.price }} TND</span>
-                <span class="badge" [class.bg-success]="p.visible" [class.bg-secondary]="!p.visible">
-                  {{ p.visible ? 'Visible' : 'Masqué' }}
-                </span>
+    <!-- Active Menu Products Grid -->
+    <div *ngIf="userProfile" class="mt-5 pt-3">
+      <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4">
+        <div>
+          <h4 class="font-weight-bold text-dark m-0">Votre Menu Actif</h4>
+          <p class="text-muted small m-0">Visualisez les produits actuellement configurés dans votre carte</p>
+        </div>
+        <div class="badge badge-product-count mt-2 mt-md-0">
+          {{ addedProducts.length }} Produits configurés
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-sm-6 col-md-4 col-xl-3" *ngFor="let p of addedProducts">
+          <div class="product-premium-card">
+            <div class="product-img-frame">
+              <img [src]="p.image || 'assets/placeholder-food.png'" alt="Image Produit">
+              <div class="product-visibility-badge" [ngClass]="p.visible ? 'visible-on' : 'visible-off'">
+                <i class="fa" [ngClass]="p.visible ? 'fa-eye' : 'fa-eye-slash'"></i>
+                {{ p.visible ? 'Visible' : 'Masqué' }}
+              </div>
+            </div>
+            <div class="product-body p-3">
+              <h6 class="product-name font-weight-bold text-dark m-0">{{ p.name }}</h6>
+              <p class="product-desc mt-1 text-muted text-xs">{{ p.description || 'Aucune description disponible.' | slice:0:70 }}{{ (p.description?.length || 0) > 70 ? '...' : '' }}</p>
+              <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top">
+                <span class="product-price font-weight-bold" [style.color]="themeData.primaryColor">{{ p.price }} <span class="text-xs">DT</span></span>
+                <span class="product-category-tag">ID: {{ p.displayOrder }}</span>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <!-- No products state -->
+      <div *ngIf="addedProducts.length === 0" class="text-center py-5 bg-white border bo-rad-10 mt-3 shadow-sm">
+        <div class="text-muted text-lg"><i class="fa fa-folder-open-o fa-3x mb-3"></i></div>
+        <h5 class="text-dark">Aucun produit trouvé</h5>
+        <p class="text-muted text-sm">Allez dans la gestion du menu pour ajouter vos premiers articles.</p>
+      </div>
+
+      <!-- Pagination Controls for Read Optimization -->
+      <div class="text-center mt-4 pt-2 mb-5" *ngIf="hasMoreProducts">
+        <button type="button" class="btn-load-more mr-2" (click)="loadMoreProducts()">
+          <i class="fa fa-chevron-down mr-2 animate-bounce"></i>Voir Plus de Produits
+        </button>
+        <button type="button" class="btn-load-all" (click)="loadAllProducts()">
+          Tout Charger
+        </button>
+      </div>
     </div>
-
-    <!-- QR Code -->
-
 
   </div>
 </div>

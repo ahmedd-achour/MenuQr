@@ -92,6 +92,17 @@
                 </div>
               </div>
 
+              <!-- Referral Code (Optional) Signup only -->
+              <div *ngIf="!isLogin" class="m-b-20">
+                <span class="txt9">
+                  Referral Code / Code de parrainage (Optional)
+                </span>
+                <div class="wrap-inputname size12 bo2 bo-rad-10 bgwhite pos-relative txt10 m-t-3">
+                  <input class="bo-rad-10 sizefull txt10 p-l-20" type="text" name="referralCode" title="member" [(ngModel)]="formData.referralCode" placeholder="Code de parrainage (Optionnel)">
+                  <i class="fa fa-gift ab-r-m m-r-18" aria-hidden="true" style="color: #d97706;"></i>
+                </div>
+              </div>
+
             </div>
           </div>
 

@@ -330,6 +330,17 @@
             </div>
           </div>
         </div>
+        
+        <!-- Pagination Controls for Read Optimization -->
+        <div class="text-center mt-3 mb-4" *ngIf="hasMoreCategoryProducts">
+          <button type="button" class="btn btn-save px-4 py-2 me-2" style="width: auto; border-radius: 6px; font-weight: 600;" (click)="loadMoreCategoryProducts()">
+            <i class="fa fa-chevron-down mr-1"></i> Voir Plus
+          </button>
+          <button type="button" class="btn btn-outline-secondary px-4 py-2" style="width: auto; border-radius: 6px; font-weight: 600;" (click)="loadAllCategoryProducts()">
+            Voir Tout
+          </button>
+        </div>
+
       </div>
     </main>
   </div>

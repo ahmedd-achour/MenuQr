@@ -18,6 +18,7 @@ import {
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { HeaderPartnerComponent } from '../header-partner/header-partner.component';
+import { MenuService } from '../services/menu.service';
 
 interface RestaurantProduct {
   id?: string;
@@ -49,6 +50,11 @@ export class PartnersMenuComponent implements OnInit {
   localDbOptions: Map<string, any[]> = new Map();
   sizesConfig: { [size: string]: { price: number; available: boolean } } = {};
 
+  // Read optimization pagination states
+  displayedProductLimit = 6;
+  hasMoreCategoryProducts = false;
+  loadedMasterProducts: Map<string, any> = new Map();
+
   editingProductId: string | null = null;
   editform!: FormGroup;
 
@@ -69,7 +75,8 @@ export class PartnersMenuComponent implements OnInit {
     private fb: FormBuilder,
     private firestore: Firestore,
     private route: ActivatedRoute,
-    private http: HttpClient
+    private http: HttpClient,
+    private menuService: MenuService
   ) {}
 
   ngOnInit(): void {
@@ -140,9 +147,8 @@ export class PartnersMenuComponent implements OnInit {
           const hasCoffee = this.categories.some(c => c.strCategory === 'Café & Boissons');
           this.selectedCategory = hasCoffee ? 'Café & Boissons' : this.categories[0].strCategory;
         }
+        this.displayedProductLimit = 6;
       }),
-      switchMap(() => this.fetchLocalRestaurantProducts()),
-      switchMap(() => this.fetchLocalRestaurantOptions()),
       switchMap(() => this.fetchMealsByCategory(this.selectedCategory)),
       catchError(err => {
         console.error('Error loading menu data:', err);
@@ -151,9 +157,18 @@ export class PartnersMenuComponent implements OnInit {
     ).subscribe();
   }
 
-  fetchLocalRestaurantProducts(): Observable<boolean> {
+  fetchLocalRestaurantProducts(masterProductIds: string[]): Observable<boolean> {
+    if (masterProductIds.length === 0) {
+      this.localDbProducts.clear();
+      return of(true);
+    }
+
     const localProductsRef = collection(this.firestore, 'restaurant_products');
-    const localQuery = query(localProductsRef, where('restaurantId', '==', this.currentRestaurantId));
+    const localQuery = query(
+      localProductsRef, 
+      where('restaurantId', '==', this.currentRestaurantId),
+      where('masterProductId', 'in', masterProductIds)
+    );
 
     return from(getDocs(localQuery)).pipe(
       map(snapshot => {
@@ -171,9 +186,18 @@ export class PartnersMenuComponent implements OnInit {
     );
   }
 
-  fetchLocalRestaurantOptions(): Observable<boolean> {
+  fetchLocalRestaurantOptions(masterProductIds: string[]): Observable<boolean> {
+    if (masterProductIds.length === 0) {
+      this.localDbOptions.clear();
+      return of(true);
+    }
+
     const optionsRef = collection(this.firestore, 'restaurant_product_options');
-    const optionsQuery = query(optionsRef, where('restaurantId', '==', this.currentRestaurantId));
+    const optionsQuery = query(
+      optionsRef, 
+      where('restaurantId', '==', this.currentRestaurantId),
+      where('masterProductId', 'in', masterProductIds)
+    );
 
     return from(getDocs(optionsQuery)).pipe(
       map(snapshot => {
@@ -196,45 +220,71 @@ export class PartnersMenuComponent implements OnInit {
   }
 
   fetchMealsByCategory(category: string): Observable<any[]> {
-    this.selectedCategory = category;
+    if (this.selectedCategory !== category) {
+      this.selectedCategory = category;
+      this.displayedProductLimit = 6;
+    }
+
     const matchingCategory = this.categories.find(c => c.strCategory === category);
     const productIds: string[] = matchingCategory ? (matchingCategory.productIds || []) : [];
 
     if (productIds.length === 0) {
       this.mealdbProducts = [];
+      this.hasMoreCategoryProducts = false;
       return of([]);
     }
 
-    const fetchPromises = productIds.map(async (id) => {
+    const targetIds = productIds.slice(0, this.displayedProductLimit);
+    this.hasMoreCategoryProducts = productIds.length > this.displayedProductLimit;
+
+    // Fetch master products checking memory cache first
+    const fetchPromises = targetIds.map(async (id) => {
+      if (this.loadedMasterProducts.has(id)) {
+        return this.loadedMasterProducts.get(id);
+      }
+      
       const productDocRef = doc(this.firestore, `master_products/${id}`);
       const snap = await getDoc(productDocRef);
-      return snap.exists() ? { id: snap.id, ...snap.data() } as any : null;
+      if (snap.exists()) {
+        const docData = { id: snap.id, ...snap.data() } as any;
+        this.loadedMasterProducts.set(id, docData);
+        return docData;
+      }
+      return null;
     });
 
     return from(Promise.all(fetchPromises)).pipe(
-      map(products => {
+      switchMap(products => {
         const validProducts = (products as any[]).filter(p => p !== null && p.active === true);
+        const validProductIds = validProducts.map(p => p.id);
 
-        this.mealdbProducts = validProducts.map((data: any) => ({
-          idMeal: data.id,
-          strMeal: data['name'],
-          strMealThumb: data['image'],
-          description: data['description'] || '',
-          defaultSizes: data['defaultSizes'] || ['Standard'],
-          isSynced: false,
-          localData: null
-        }));
+        return from(Promise.all([
+          this.fetchLocalRestaurantProducts(validProductIds).toPromise(),
+          this.fetchLocalRestaurantOptions(validProductIds).toPromise()
+        ])).pipe(
+          map(() => {
+            this.mealdbProducts = validProducts.map((data: any) => ({
+              idMeal: data.id,
+              strMeal: data['name'],
+              strMealThumb: data['image'],
+              description: data['description'] || '',
+              defaultSizes: data['defaultSizes'] || ['Standard'],
+              isSynced: false,
+              localData: null
+            }));
 
-        this.mealdbProducts = this.mealdbProducts.map(meal => {
-          const localMatch = this.localDbProducts.get(meal.idMeal);
-          return {
-            ...meal,
-            isSynced: !!localMatch,
-            localData: localMatch || null
-          };
-        });
+            this.mealdbProducts = this.mealdbProducts.map(meal => {
+              const localMatch = this.localDbProducts.get(meal.idMeal);
+              return {
+                ...meal,
+                isSynced: !!localMatch,
+                localData: localMatch || null
+              };
+            });
 
-        return this.mealdbProducts;
+            return this.mealdbProducts;
+          })
+        );
       }),
       catchError(err => {
         console.error('Failed to fetch meals:', err);
@@ -280,13 +330,98 @@ export class PartnersMenuComponent implements OnInit {
   }
 
   async saveProductUpdate(meal: any) {
-    console.log('saveProductUpdate called for', meal.idMeal);
-    // Add your original save logic here
+    try {
+      const formValues = this.editform.value;
+      const productId = formValues.id || `${this.currentRestaurantId}_${meal.idMeal}`;
+      const productDocRef = doc(this.firestore, `restaurant_products/${productId}`);
+
+      const defaultSizes = meal.defaultSizes || ['Standard'];
+      const firstSize = defaultSizes[0] || 'Standard';
+      const sizeConfig = this.sizesConfig[firstSize];
+      const finalPrice = sizeConfig ? Number(sizeConfig.price || 12.0) : Number(formValues.priceVariant || 12.0);
+
+      const productPayload = {
+        restaurantId: this.currentRestaurantId,
+        masterProductId: meal.idMeal,
+        visible: formValues.visible,
+        descriptionOverride: formValues.descriptionOverride || '',
+        imageOverride: formValues.imageOverride || '',
+        displayOrder: Number(formValues.displayOrder || 0),
+        nameSnapshot: meal.strMeal,
+        priceVariant: finalPrice
+      };
+
+      await setDoc(productDocRef, productPayload, { merge: true });
+
+      // Save size options
+      for (const size of defaultSizes) {
+        const config = this.sizesConfig[size];
+        if (config) {
+          const optionId = `${this.currentRestaurantId}_${meal.idMeal}_${size}`;
+          const optionDocRef = doc(this.firestore, `restaurant_product_options/${optionId}`);
+          await setDoc(optionDocRef, {
+            restaurantId: this.currentRestaurantId,
+            masterProductId: meal.idMeal,
+            size: size,
+            price: Number(config.price || 0),
+            available: !!config.available
+          }, { merge: true });
+        }
+      }
+
+      alert('Produit mis à jour avec succès dans votre menu !');
+      this.editingProductId = null;
+
+      // Automatically publish/compile menu to optimize scan reads
+      await this.menuService.publishMenu(this.currentRestaurantId);
+
+      // Refresh category view
+      this.fetchMealsByCategory(this.selectedCategory).subscribe();
+    } catch (err) {
+      console.error('Error saving product update:', err);
+      alert('Une erreur est survenue lors de la sauvegarde.');
+    }
   }
 
   async removeProduct(meal: any) {
-    console.log('removeProduct called for', meal.idMeal);
-    // Add your original remove logic here
+    if (!confirm(`Voulez-vous vraiment retirer "${meal.strMeal}" de votre menu ?`)) {
+      return;
+    }
+
+    try {
+      const productId = meal.localData?.id || `${this.currentRestaurantId}_${meal.idMeal}`;
+      await deleteDoc(doc(this.firestore, `restaurant_products/${productId}`));
+
+      // Delete options
+      const defaultSizes = meal.defaultSizes || ['Standard'];
+      for (const size of defaultSizes) {
+        const optionId = `${this.currentRestaurantId}_${meal.idMeal}_${size}`;
+        await deleteDoc(doc(this.firestore, `restaurant_product_options/${optionId}`));
+      }
+
+      alert('Produit retiré du menu.');
+
+      // Automatically publish/compile menu to optimize scan reads
+      await this.menuService.publishMenu(this.currentRestaurantId);
+
+      // Refresh category view
+      this.fetchMealsByCategory(this.selectedCategory).subscribe();
+    } catch (err) {
+      console.error('Error removing product:', err);
+      alert('Une erreur est survenue lors du retrait.');
+    }
+  }
+
+  loadMoreCategoryProducts(): void {
+    this.displayedProductLimit += 6;
+    this.fetchMealsByCategory(this.selectedCategory).subscribe();
+  }
+
+  loadAllCategoryProducts(): void {
+    const matchingCategory = this.categories.find(c => c.strCategory === this.selectedCategory);
+    const productIds: string[] = matchingCategory ? (matchingCategory.productIds || []) : [];
+    this.displayedProductLimit = productIds.length;
+    this.fetchMealsByCategory(this.selectedCategory).subscribe();
   }
 
   // ==================== CLOUDINARY UPLOAD ====================

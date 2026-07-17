@@ -19,7 +19,8 @@ export class RegisterComponent {
     phone: '',
     countryCode: '+216',
     password: '',
-    businessType: ''
+    businessType: '',
+    referralCode: ''
   };
 
   loading = false;
@@ -68,7 +69,8 @@ export class RegisterComponent {
         isVerified: false,
         status: "active",
         currentRestaurantId: "",
-        role: "owner"
+        role: "owner",
+        referralCode: this.formData.referralCode || ""
       };
 
       const userDocRef = doc(this.firestore, `users/${uid}`);

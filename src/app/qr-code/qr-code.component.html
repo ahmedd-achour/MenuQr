@@ -1,9 +1,11 @@
 <div
   class="qr-menu-wrapper"
-  [style.--primary-color]="theme?.primaryColor || '#222222'"
-  [style.--secondary-color]="theme?.secondaryColor || '#b68834'"
-  [style.--background-color]="theme?.background || '#f9f9ff'"
-  [style.--card-color]="theme?.cardColor || '#ffffff'"
+  [style.--primary-color]="theme?.primaryColor || '#d97706'"
+  [style.--secondary-color]="theme?.secondaryColor || '#78350f'"
+  [style.--background-color]="theme?.background || '#ffffff'"
+  [style.--card-color]="theme?.cardColor || '#f8fafc'"
+  [style.--border-radius.px]="theme?.radius ?? 10"
+  [style.--font-family]="theme?.font || 'Outfit'"
   [class.dark-theme]="theme?.darkMode">
 
   <!-- Banner/Hero Section -->
@@ -13,6 +15,9 @@
     <div class="container">
       <div class="row fullscreen d-flex align-items-center justify-content-start" style="min-height: 400px; padding: 100px 0;">
         <div class="banner-content col-lg-7">
+          <div class="logo-wrapper" *ngIf="restaurant?.logo">
+            <img [src]="restaurant?.logo" alt="Logo" class="restaurant-logo">
+          </div>
           <h6 class="text-white text-uppercase">Now you can taste the quality</h6>
           <h1>{{ restaurant?.name || 'Welcome' }}</h1>
           <p class="text-white">
@@ -53,7 +58,7 @@
                (click)="selectCategory('all')">
             All
           </div>
-          <div *ngFor="let cat of categories"
+          <div *ngFor="let cat of activeCategories"
                class="category-chip"
                [class.active]="selectedCategoryId === cat.id"
                (click)="selectCategory(cat.id)">

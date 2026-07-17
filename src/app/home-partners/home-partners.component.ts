@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Firestore, doc, docData, updateDoc, setDoc, collection, getDocs, getDoc, query, where } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytes, getDownloadURL } from '@angular/fire/storage';
 import { CommonModule } from '@angular/common';
@@ -44,7 +44,7 @@ interface Theme {
 @Component({
   selector: 'app-home-partners',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderPartnerComponent],
+  imports: [CommonModule, FormsModule, HeaderPartnerComponent, RouterLink],
   templateUrl: './home-partners.component.html',
   styleUrl: './home-partners.component.css'
 })
