@@ -49,15 +49,19 @@
           </div>
            <div class="mt-5 text-center">
       <h4>Votre QR Code Menu</h4>
+
+
+
+
       <div class="d-inline-block p-4 bg-white shadow rounded-4">
-        <img [src]="'https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=http://localhost:4200/qr-code/' + userId" alt="QR">
+        <img [src]="'https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=https://menuqr-cu5.pages.dev/admin-panel/'+userId+'/qr-code'" alt="QR">
         <br>
         <button (click)="downloadQRCode()" class="btn btn-dark mt-3 px-4">Télécharger QR Code</button>
       </div>
     </div>
 
 
-    <a href="/admin-panel/{{userId}}/qr-code"> see Preview URL </a>
+<!-- QR Preview Link -->
         </div>
       </div>
 
