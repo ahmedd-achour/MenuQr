@@ -57,6 +57,7 @@ export class QrCodeComponent implements OnInit, OnDestroy {
 
   // Debug Variables
   showRawData = false;
+  hasAccess: boolean = true;
   routeParamsJson = '{}';
 
   get filteredProducts(): Product[] {
@@ -124,78 +125,117 @@ export class QrCodeComponent implements OnInit, OnDestroy {
 
 
 
-  private async fetchRestaurantData(ownerId: string): Promise<void> {
+ private async fetchRestaurantData(ownerId: string): Promise<void> {
+  try {
+    let restaurantDocData: any = null;
+    let restaurantDocId = '';
+
+    // === USER FETCH + ACCESS CONTROL ===
+    let userData: any = null;
     try {
-      let restaurantDocData: any = null;
-      let restaurantDocId = '';
+      const userDocRef = doc(this.firestore, `users/${ownerId}`);
+      const userSnap = await getDoc(userDocRef);
 
-      // First try: Get user doc and look up currentRestaurantId
-      try {
-        const userDocRef = doc(this.firestore, `users/${ownerId}`);
-        const userSnap = await getDoc(userDocRef);
-        if (userSnap.exists()) {
-          const userData = userSnap.data();
-          const currentRestaurantId = userData['currentRestaurantId'];
-          if (currentRestaurantId) {
-            const restDocRef = doc(this.firestore, `restaurants/${currentRestaurantId}`);
-            const restSnap = await getDoc(restDocRef);
-            if (restSnap.exists()) {
-              restaurantDocData = restSnap.data();
-              restaurantDocId = restSnap.id;
-              console.log('[QR Code] Resolved restaurant via user currentRestaurantId:', restaurantDocId);
-            }
-          }
-        }
-      } catch (err) {
-        console.warn('[QR Code] Failed resolving restaurant via user doc:', err);
-      }
+      if (userSnap.exists()) {
+        userData = userSnap.data();
 
-      // Second try: Query restaurants collection by ownerId
-      if (!restaurantDocData) {
-        const restaurantRef = collection(this.firestore, 'restaurants');
-        const restaurantQuery = query(restaurantRef, where('ownerId', '==', ownerId), limit(1));
-        const restaurantSnap = await getDocs(restaurantQuery);
+        // Check trial / paid status
+        const hasValidAccess = this.checkUserAccess(userData);
 
-        if (!restaurantSnap.empty) {
-          const restaurantDoc = restaurantSnap.docs[0];
-          restaurantDocData = restaurantDoc.data();
-          restaurantDocId = restaurantDoc.id;
-          console.log('[QR Code] Resolved restaurant via ownerId query:', restaurantDocId);
+        if (!hasValidAccess) {
+          this.hasAccess = false;
+          this.trialMessage = "Your free trial has ended. Subscribe now for unlimited access to your QR menu.";
+          this.loading = false;
+          return; // ← Stop here, don't load menu
         }
       }
-
-      if (!restaurantDocData) {
-        this.errorMessage = `Could not find a restaurant linked to user/owner ID "${ownerId}".`;
-        return;
-      }
-
-      this.restaurant = {
-        id: restaurantDocData['id'] || restaurantDocId,
-        ownerId: restaurantDocData['ownerId'] || '',
-        name: restaurantDocData['businessName'] || restaurantDocData['name'] || 'Restaurant Loaded',
-        coverImage: restaurantDocData['coverImage'] || '',
-        description: restaurantDocData['description'] || '',
-        logo: restaurantDocData['logo'] || ''
-      };
-
-      this.restaurantId = this.restaurant.id;
-
-      if (this.restaurantId) {
-        await Promise.all([
-          this.fetchCategories().catch(e => console.warn(e)),
-          this.fetchProducts(this.restaurantId).catch(e => {
-            this.errorMessage = `Products Query Failed: ${e.message}`;
-          }),
-          this.fetchTheme(this.restaurantId).catch(e => {
-            this.errorMessage = `Themes Query Failed: ${e.message}`;
-          })
-        ]);
-      }
-    } catch (error: any) {
-      this.errorMessage = `Database query execution timed out or failed: ${error?.message || error}`;
-      throw error;
+    } catch (err) {
+      console.warn('[QR Code] Failed to fetch user data:', err);
     }
+
+    // === RESTAURANT RESOLUTION ===
+    if (userData) {
+      const currentRestaurantId = userData['currentRestaurantId'];
+      if (currentRestaurantId) {
+        const restDocRef = doc(this.firestore, `restaurants/${currentRestaurantId}`);
+        const restSnap = await getDoc(restDocRef);
+        if (restSnap.exists()) {
+          restaurantDocData = restSnap.data();
+          restaurantDocId = restSnap.id;
+        }
+      }
+    }
+
+    // Fallback: Query by ownerId
+    if (!restaurantDocData) {
+      const restaurantRef = collection(this.firestore, 'restaurants');
+      const restaurantQuery = query(restaurantRef, where('ownerId', '==', ownerId), limit(1));
+      const restaurantSnap = await getDocs(restaurantQuery);
+
+      if (!restaurantSnap.empty) {
+        const doc = restaurantSnap.docs[0];
+        restaurantDocData = doc.data();
+        restaurantDocId = doc.id;
+      }
+    }
+
+    if (!restaurantDocData) {
+      this.errorMessage = `Could not find a restaurant for owner ID "${ownerId}".`;
+      this.loading = false;
+      return;
+    }
+
+    // Set restaurant data
+    this.restaurant = {
+      id: restaurantDocData['id'] || restaurantDocId,
+      ownerId: restaurantDocData['ownerId'] || ownerId,
+      name: restaurantDocData['businessName'] || restaurantDocData['name'] || 'Restaurant',
+      coverImage: restaurantDocData['coverImage'] || '',
+      description: restaurantDocData['description'] || '',
+      logo: restaurantDocData['logo'] || ''
+    };
+
+    this.restaurantId = this.restaurant.id;
+
+    // Load menu + theme only if access is granted
+    if (this.restaurantId && this.hasAccess) {
+      await Promise.all([
+        this.fetchCategories().catch(e => console.warn(e)),
+        this.fetchProducts(this.restaurantId).catch(e => console.error(e)),
+        this.fetchTheme(this.restaurantId).catch(e => console.error(e))
+      ]);
+    }
+
+  } catch (error: any) {
+    console.error('[QR Code] fetchRestaurantData failed:', error);
+    this.errorMessage = error?.message || 'Failed to load restaurant data';
+  } finally {
+    if (this.loading) this.loading = false;
   }
+}
+
+private checkUserAccess(userData: any): boolean {
+  if (!userData) return false;
+  if (userData['paid'] === true) return true;
+
+  const createdAt = userData['createdAt'];
+  if (!createdAt) return false;
+
+  let createdDate: Date;
+  if (createdAt instanceof Date) {
+    createdDate = createdAt;
+  } else if (typeof createdAt === 'string') {
+    createdDate = new Date(createdAt);
+  } else if (createdAt?.seconds) { // Firestore Timestamp
+    createdDate = new Date(createdAt.seconds * 1000);
+  } else {
+    return false;
+  }
+
+  const now = new Date();
+  const diffDays = Math.ceil((now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
+  return diffDays <= 14;
+}
 
    async fetchProducts(restaurantId: string): Promise<void> {
   try {
@@ -366,6 +406,10 @@ export class QrCodeComponent implements OnInit, OnDestroy {
       console.error('[QR Component] Style assignment failed:', error);
     }
   }
+// Add this new property near other declarations
+trialMessage: string = '';
+
+// Inside fetchRestaurantData(), replace the access check part with this improved version:
 
   ngOnDestroy(): void {
     this.destroy$.next();

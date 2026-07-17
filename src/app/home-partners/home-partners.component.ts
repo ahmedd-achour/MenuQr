@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { Firestore, doc, docData, updateDoc, setDoc, collection, getDocs, getDoc, query, where } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytes, getDownloadURL } from '@angular/fire/storage';
 import { CommonModule } from '@angular/common';
@@ -8,55 +8,54 @@ import { HeaderPartnerComponent } from '../header-partner/header-partner.compone
 
 interface UserProfile {
   id: string;
-  email: string;
-  fullName: string;
-  currentRestaurantId: string;
-  status: string;
+  email?: string;
+  fullName?: string;
+  currentRestaurantId?: string;
+  phone : string;
+  status?: string;
 }
 
 interface Restaurant {
   id: string;
-  ownerId: string;
-  businessName: string;
-  slug: string;
-  logo: string;
-  coverImage: string;
-  address: string;
-  city: string;
-  description: string;
-  currency: string;
-  language: string;
-  status: string;
+  ownerId?: string;
+  businessName?: string;
+  slug?: string;
+  logo?: string;
+  coverImage?: string;
+  address?: string;
+  city?: string;
+  description?: string;
+  currency?: string;
+  language?: string;
+  status?: string;
 }
 
 interface Theme {
-  id?: string;
   restaurantId: string;
   primaryColor: string;
   secondaryColor: string;
   background: string;
   cardColor: string;
-  font?: string;
-  radius?: number;
+  font: string;
+  radius: number;
   darkMode: boolean;
 }
 
 @Component({
   selector: 'app-home-partners',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, HeaderPartnerComponent],
+  imports: [CommonModule, FormsModule, HeaderPartnerComponent],
   templateUrl: './home-partners.component.html',
   styleUrl: './home-partners.component.css'
 })
 export class HomePartnersComponent implements OnInit {
 
-  userId!: string;
-  userProfile?: UserProfile;
+  userId: string = '';
+  userProfile?: UserProfile ;
+
   restaurantData: Restaurant = {
     id: '',
-    ownerId: '',
     businessName: '',
-    slug: '',
     logo: '',
     coverImage: '',
     address: '',
@@ -67,7 +66,6 @@ export class HomePartnersComponent implements OnInit {
     status: 'trial'
   };
 
-  themeDocId!: string;
   themeData: Theme = {
     restaurantId: '',
     primaryColor: '#d97706',
@@ -79,10 +77,10 @@ export class HomePartnersComponent implements OnInit {
     darkMode: false
   };
 
+  addedProducts: any[] = [];
   isSaving = false;
   notificationMessage = '';
   isError = false;
-  addedProducts: any[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -91,222 +89,170 @@ export class HomePartnersComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // 1. Fetch Route UID Parameter: home-partner/:id
     this.userId = this.route.snapshot.paramMap.get('id') || '';
+    console.log('[HomePartners] User ID from route:', this.userId);
+
     if (this.userId) {
-      this.loadPartnerAndRestaurant();
+      this.loadAllData();
     } else {
-      this.triggerAlert('Invalid session ID. Please log in again.', true);
+      this.triggerAlert('ID utilisateur manquant dans l\'URL.', true);
     }
   }
 
-  /**
-   * Retrieves user configuration first, then grabs the associated Restaurant document
-   */
-  private loadPartnerAndRestaurant(): void {
-    const userDocRef = doc(this.firestore, `users/${this.userId}`);
-    docData(userDocRef).subscribe({
+  private loadAllData(): void {
+    // Load User
+    const userRef = doc(this.firestore, `users/${this.userId}`);
+    docData(userRef, { idField: 'id' }).subscribe({
       next: (user: any) => {
+        console.log('[HomePartners] User data loaded:', user);
         if (user) {
           this.userProfile = user as UserProfile;
+
           if (user.currentRestaurantId) {
-            this.fetchRestaurant(user.currentRestaurantId);
+            this.loadRestaurant(user.currentRestaurantId);
           } else {
-            this.triggerAlert('No active restaurant profile linked to this account.', true);
+            this.triggerAlert('Aucun restaurant lié à ce compte.', true);
           }
+        }
+      },
+      error: (err) => {
+        console.error('[HomePartners] User load error:', err);
+        this.triggerAlert('Impossible de charger les données utilisateur.', true);
+      }
+    });
+  }
+
+  private loadRestaurant(restaurantId: string): void {
+    console.log('[HomePartners] Loading restaurant:', restaurantId);
+    const restRef = doc(this.firestore, `restaurants/${restaurantId}`);
+    docData(restRef, { idField: 'id' }).subscribe({
+      next: (data: any) => {
+        console.log('[HomePartners] Restaurant data:', data);
+        if (data) {
+          this.restaurantData = { ...data, id: restaurantId } as Restaurant;
+          this.loadTheme(restaurantId);
+          this.loadAddedProducts(restaurantId);
         } else {
-          this.triggerAlert('User document not found in the platform database.', true);
+          this.triggerAlert('Restaurant non trouvé.', true);
         }
       },
       error: (err) => {
-        console.error(err);
-        this.triggerAlert('Error loading partner data.', true);
+        console.error('[HomePartners] Restaurant load error:', err);
+        this.triggerAlert('Erreur lors du chargement du restaurant.', true);
       }
     });
   }
 
-  private fetchRestaurant(restaurantId: string): void {
-    const restaurantDocRef = doc(this.firestore, `restaurants/${restaurantId}`);
-    docData(restaurantDocRef).subscribe({
-      next: (restaurant: any) => {
-        if (restaurant) {
-          this.restaurantData = { ...restaurant } as Restaurant;
-          this.fetchTheme(restaurantId);
-          this.fetchAddedProducts(restaurantId);
+  private loadTheme(restaurantId: string): void {
+    const themeRef = doc(this.firestore, `themes/theme_${restaurantId}`);
+    docData(themeRef).subscribe({
+      next: (data: any) => {
+        if (data) {
+          this.themeData = { ...data, restaurantId } as Theme;
+          console.log('[HomePartners] Theme loaded:', this.themeData);
         }
       },
-      error: (err) => {
-        console.error(err);
-        this.triggerAlert('Error loading restaurant data.', true);
-      }
+      error: (err) => console.warn('Theme load warning:', err)
     });
   }
 
-  private fetchTheme(restaurantId: string): void {
-    this.themeDocId = `theme_${restaurantId}`;
-    const themeDocRef = doc(this.firestore, `themes/${this.themeDocId}`);
-    docData(themeDocRef).subscribe({
-      next: (theme: any) => {
-        if (theme) {
-          this.themeData = { ...theme } as Theme;
-        } else {
-          this.themeData = {
-            id: this.themeDocId,
-            restaurantId: restaurantId,
-            primaryColor: '#d97706',
-            secondaryColor: '#78350f',
-            background: '#ffffff',
-            cardColor: '#f8fafc',
-            font: 'Outfit',
-            radius: 8,
-            darkMode: false
-          };
-        }
-      },
-      error: (err) => {
-        console.error('Error fetching theme:', err);
-      }
-    });
+  private async loadAddedProducts(restaurantId: string): Promise<void> {
+    try {
+      const prodRef = collection(this.firestore, 'restaurant_products');
+      const q = query(prodRef, where('restaurantId', '==', restaurantId));
+      const snapshot = await getDocs(q);
+
+      const products = await Promise.all(snapshot.docs.map(async (d) => {
+        const data = d.data();
+        return {
+          id: d.id,
+          name: data['nameSnapshot'] || 'Produit',
+          image: data['imageOverride'] || '',
+          description: data['descriptionOverride'] || '',
+          price: data['priceVariant'] || 0,
+          visible: data['visible'] !== false
+        };
+      }));
+
+      this.addedProducts = products;
+      console.log(`[HomePartners] Loaded ${products.length} products`);
+    } catch (err) {
+      console.error('Products load error:', err);
+    }
   }
 
-  /**
-   * Safely updates only the permitted attributes of the restaurant (Excludes phone/email)
-   */
   onSave(): void {
-    if (!this.restaurantData.id) return;
+    if (!this.restaurantData.id) {
+      this.triggerAlert('Aucun restaurant à sauvegarder.', true);
+      return;
+    }
+
     this.isSaving = true;
 
-    const payload = {
+    const restaurantPayload = {
       businessName: this.restaurantData.businessName,
-      slug: this.generateSlug(this.restaurantData.businessName),
-      logo: this.restaurantData.logo,
-      coverImage: this.restaurantData.coverImage,
       address: this.restaurantData.address,
       city: this.restaurantData.city,
       description: this.restaurantData.description,
       currency: this.restaurantData.currency,
       language: this.restaurantData.language,
-      menuVersion: (this.restaurantData as any).menuVersion ? (this.restaurantData as any).menuVersion + 1 : 1
+      updatedAt: new Date()
     };
 
-    const restaurantDocRef = doc(this.firestore, `restaurants/${this.restaurantData.id}`);
-    updateDoc(restaurantDocRef, payload)
+    const restaurantRef = doc(this.firestore, `restaurants/${this.restaurantData.id}`);
+
+    updateDoc(restaurantRef, restaurantPayload)
       .then(() => {
-        const themeDocRef = doc(this.firestore, `themes/${this.themeDocId}`);
-        return setDoc(themeDocRef, {
-          restaurantId: this.restaurantData.id,
-          primaryColor: this.themeData.primaryColor,
-          secondaryColor: this.themeData.secondaryColor,
-          background: this.themeData.background,
-          cardColor: this.themeData.cardColor,
-          font: this.themeData.font || 'Outfit',
-          radius: Number(this.themeData.radius) || 8,
-          darkMode: !!this.themeData.darkMode
-        }, { merge: true });
+        const themeRef = doc(this.firestore, `themes/theme_${this.restaurantData.id}`);
+        return setDoc(themeRef, this.themeData, { merge: true });
       })
       .then(() => {
         this.isSaving = false;
-        this.triggerAlert('Restaurant profile and theme configuration successfully updated!', false);
+        this.triggerAlert('✅ Modifications sauvegardées avec succès !', false);
       })
-      .catch((err) => {
+      .catch(err => {
         this.isSaving = false;
-        this.triggerAlert('Error updating profile: ' + err.message, true);
+        console.error(err);
+        this.triggerAlert('❌ Erreur de sauvegarde : ' + err.message, true);
       });
   }
 
-  /**
-   * Performs dynamic media file upload directly to Firebase Cloud Storage
-   */
-  uploadMedia(event: Event, targetField: 'logo' | 'coverImage'): void {
-    const inputElement = event.target as HTMLInputElement;
-    if (!inputElement.files || inputElement.files.length === 0) return;
-
-    const file = inputElement.files[0];
-    const path = `restaurants/${this.restaurantData.id}/${targetField}_${Date.now()}`;
-    const storageRef = ref(this.storage, path);
+  uploadMedia(event: any, field: 'logo' | 'coverImage'): void {
+    const file = event.target?.files?.[0];
+    if (!file || !this.restaurantData.id) return;
 
     this.isSaving = true;
+    const path = `restaurants/${this.restaurantData.id}/${field}_${Date.now()}`;
+    const storageRef = ref(this.storage, path);
 
     uploadBytes(storageRef, file)
-      .then((snapshot) => getDownloadURL(snapshot.ref))
-      .then((url) => {
-        if (targetField === 'logo') {
-          this.restaurantData.logo = url;
-        } else {
-          this.restaurantData.coverImage = url;
-        }
+      .then(snapshot => getDownloadURL(snapshot.ref))
+      .then(url => {
+        if (field === 'logo') this.restaurantData.logo = url;
+        else this.restaurantData.coverImage = url;
+
         this.isSaving = false;
-        this.triggerAlert(`${targetField === 'logo' ? 'Logo' : 'Cover image'} uploaded. Save changes to finalize.`, false);
+        this.triggerAlert(`${field === 'logo' ? 'Logo' : 'Couverture'} téléchargé avec succès.`, false);
       })
-      .catch((err) => {
+      .catch(err => {
         this.isSaving = false;
-        this.triggerAlert('Upload failed: ' + err.message, true);
+        this.triggerAlert('Échec du téléversement.', true);
+        console.error(err);
       });
   }
 
-  /**
-   * Generates a cleaner SEO-ready slug mapping from user business inputs
-   */
-  private generateSlug(text: string): string {
-    return text
-      .toString()
-      .toLowerCase()
-      .replace(/\s+/g, '-')           // Replace spaces with -
-      .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
-      .replace(/\-\-+/g, '-')         // Replace multiple - with single -
-      .replace(/^-+/, '')             // Trim - from start
-      .replace(/-+$/, '');            // Trim - from end
+  downloadQRCode(): void {
+    if (!this.userId) return;
+    const url = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=http://localhost:4200/qr-code/${this.userId}`;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `qr-menu-${this.restaurantData.businessName || 'my-restaurant'}.png`;
+    a.click();
   }
 
-  private triggerAlert(msg: string, isErr: boolean): void {
-    this.notificationMessage = msg;
-    this.isError = isErr;
-    setTimeout(() => {
-      this.notificationMessage = '';
-    }, 6000);
+  private triggerAlert(message: string, isError: boolean): void {
+    this.notificationMessage = message;
+    this.isError = isError;
+    setTimeout(() => this.notificationMessage = '', 6000);
   }
-
-  private async fetchAddedProducts(restaurantId: string): Promise<void> {
-    try {
-      const localProductsRef = collection(this.firestore, 'restaurant_products');
-      const localQuery = query(localProductsRef, where('restaurantId', '==', restaurantId));
-      const snapshot = await getDocs(localQuery);
-
-      const fetchPromises = snapshot.docs.map(async (d) => {
-        const prodData = d.data();
-        const masterProductId = prodData['masterProductId'];
-        
-        let name = 'Produit';
-        let defaultImage = '';
-        let description = '';
-        
-        if (masterProductId) {
-          const masterDocRef = doc(this.firestore, `master_products/${masterProductId}`);
-          const masterSnap = await getDoc(masterDocRef);
-          if (masterSnap.exists()) {
-            const masterData = masterSnap.data();
-            name = masterData['name'] || name;
-            defaultImage = masterData['image'] || defaultImage;
-            description = masterData['description'] || description;
-          }
-        }
-
-        return {
-          id: d.id,
-          name: name,
-          image: prodData['imageOverride'] || defaultImage,
-          description: prodData['descriptionOverride'] || description,
-          price: prodData['priceVariant'] || 12.00,
-          visible: prodData['visible'] !== false,
-          displayOrder: prodData['displayOrder'] || 0
-        };
-      });
-
-      this.addedProducts = await Promise.all(fetchPromises);
-      this.addedProducts.sort((a, b) => a.displayOrder - b.displayOrder);
-    } catch (err) {
-      console.error('Error fetching active products:', err);
-    }
-  }
-
 }

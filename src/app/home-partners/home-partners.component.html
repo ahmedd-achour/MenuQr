@@ -1,336 +1,162 @@
 <app-header-partner [userId]="userId"></app-header-partner>
 
-<div class="partners-dashboard bg1-pattern py-5" style="background-color: #fcf9f4; min-height: 100vh;">
+<div class="partners-dashboard py-5" style="background-color: #fcf9f4; min-height: 100vh;">
   <div class="container-fluid px-md-5 px-3">
 
-    <!-- Dynamic Feedback Toast -->
-    <div *ngIf="notificationMessage"
-         class="alert-toast shadow p-3 mb-4 d-flex align-items-center justify-content-between bo-rad-10"
-         [ngClass]="isError ? 'toast-err' : 'toast-success'"
-         style="border-radius: 10px; font-weight: 600; font-size: 14px;">
+    <!-- Toast -->
+    <div *ngIf="notificationMessage" class="alert-toast shadow p-3 mb-4 d-flex align-items-center justify-content-between"
+         [ngClass]="isError ? 'toast-err' : 'toast-success'">
       <div class="d-flex align-items-center">
-        <i class="fa mr-3" [ngClass]="isError ? 'fa-exclamation-triangle' : 'fa-check-circle'" style="font-size: 18px;"></i>
+        <i class="fa mr-3" [ngClass]="isError ? 'fa-exclamation-triangle' : 'fa-check-circle'"></i>
         <span>{{ notificationMessage }}</span>
       </div>
-      <button type="button" class="btn-close border-0 bg-transparent text-dark" (click)="notificationMessage = ''" aria-label="Close" style="font-weight: 700;">×</button>
+      <button (click)="notificationMessage = ''" class="btn-close">*</button>
     </div>
 
-    <!-- Elegant Welcome Header matched to Home style -->
-    <div class="text-center m-b-50">
-      <span class="tit2 t-center">Tableau de bord</span>
-      <h3 class="tit5 t-center m-t-2" style="font-size: 32px; font-weight: 800; color: #111;">
-        {{ restaurantData.businessName || 'Mon Établissement' }}
-      </h3>
-      <div class="d-flex align-items-center justify-content-center gap-2 mt-2">
-        <span class="badge" [ngClass]="restaurantData.status === 'active' ? 'bg-success' : 'bg-warning'" style="padding: 6px 12px; font-size: 12px; font-weight: 700; color: #fff; border-radius: 4px;">
-          {{ restaurantData.status === 'trial' ? 'Compte d\'Essai' : 'Abonnement Actif' }}
-        </span>
+    <!-- Header -->
+    <div class="text-center mb-5">
+      <h3 class="fw-bold" style="color: #111;">{{ restaurantData.businessName || 'Mon Établissement' }}</h3>
+    </div>
+
+    <div class="row g-4">
+
+      <!-- Left Column: Branding -->
+      <div class="col-lg-4">
+        <div class="dashboard-card p-0 overflow-hidden bg-white border bo-rad-10 h-100">
+          <!-- Cover -->
+          <div class="preview-cover-banner position-relative"
+          [style.backgroundImage]="'url(' + (restaurantData.coverImage || 'assets/teste.jpg') + ')'">
+            <div class="uploader-overlay" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
+              <i class="fa fa-camera text-white fa-2x"></i>
+              <input title="jk"  type="file" (change)="uploadMedia($event, 'coverImage')" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;">
+            </div>
+          </div>
+
+          <!-- Logo -->
+          <div class="text-center" style="margin-top: -55px; z-index: 10; position: relative;">
+            <div class="preview-logo-wrapper mx-auto"
+                 [style.backgroundImage]="'url(' + (restaurantData.logo || 'assets/logo.png') + ')'">
+              <div class="uploader-overlay rounded-circle" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
+                <i class="fa fa-pencil text-white"></i>
+                <input title="jk"  type="file" (change)="uploadMedia($event, 'logo')" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;">
+              </div>
+            </div>
+          </div>
+
+          <div class="p-4 text-center">
+            <h5 class="fw-bold">{{ restaurantData.businessName }}</h5>
+            <p class="text-muted">{{ restaurantData.city }}</p>
+          </div>
+           <div class="mt-5 text-center">
+      <h4>Votre QR Code Menu</h4>
+      <div class="d-inline-block p-4 bg-white shadow rounded-4">
+        <img [src]="'https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=http://localhost:4200/qr-code/' + userId" alt="QR">
+        <br>
+        <button (click)="downloadQRCode()" class="btn btn-dark mt-3 px-4">Télécharger QR Code</button>
       </div>
     </div>
 
-    <!-- Main Grid Workspace Form -->
-    <form #settingsForm="ngForm" (ngSubmit)="onSave()" class="row g-4">
 
-      <!-- Left Column: Unified Interactive Branding Cards & Profile Status -->
-      <div class="col-lg-4 m-b-30">
-        <div class="dashboard-card shadow-sm h-100 p-0 overflow-hidden bg-white border bo-rad-10 position-relative">
-
-          <!-- Interactive Cover Photo Mockup Wrapper -->
-          <div class="preview-cover-banner position-relative"
-               style="height: 160px; background-size: cover; background-position: center; background-repeat: no-repeat;"
-               [style.backgroundImage]="'url(' + (restaurantData.coverImage || 'assets/teste.jpg') + ')'">
-
-            <div class="uploader-overlay d-flex flex-col justify-content-center align-items-center" style="position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.4); opacity: 0; transition: opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
-              <i class="fa fa-camera text-white" style="font-size: 20px;"></i>
-              <span class="upload-indicator-text mt-2 text-white font-weight-bold" style="font-size: 11px;">Modifier la couverture</span>
-              <input type="file" (change)="uploadMedia($event, 'coverImage')" accept="image/*" class="hidden-file-input" title="Modifier la couverture" style="position: absolute; top:0; left:0; width:100%; height:100%; opacity: 0; cursor: pointer;">
-            </div>
-
-            <!-- Overlapping Interactive Logo Mockup Wrapper -->
-            <div class="preview-logo-wrapper position-absolute"
-                 style="width: 86px; height: 86px; border-radius: 50%; border: 4px solid #ffffff; background-size: cover; background-position: center; bottom: -43px; left: 50%; transform: translateX(-50%); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); overflow: hidden; background-color: #eee;"
-                 [style.backgroundImage]="'url(' + (restaurantData.logo || 'assets/logo.png') + ')'">
-              <div class="uploader-overlay rounded-circle d-flex align-items-center justify-content-center" style="position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
-                <i class="fa fa-pencil text-white" style="font-size: 14px;"></i>
-                <input type="file" (change)="uploadMedia($event, 'logo')" accept="image/*" class="hidden-file-input" title="Modifier le logo" style="position: absolute; top:0; left:0; width:100%; height:100%; opacity: 0; cursor: pointer;">
-              </div>
-            </div>
-
-          </div>
-
-          <!-- Quick Owner Meta Information Block -->
-          <div class="p-4 text-center mt-5">
-            <h4 class="brand-title" style="font-weight: 700; color: #1f2937; font-size: 18px; margin-bottom: 5px;">
-              {{ restaurantData.businessName || 'Nom de l\'établissement' }}
-            </h4>
-            <p class="text-muted mb-4"><i class="fa fa-map-marker text-danger mr-1"></i> {{ restaurantData.city || 'Tunis' }}, Tunisie</p>
-
-            <hr class="divider" style="border-top: 1px solid #f3f4f6;">
-
-            <div class="text-start px-2 mt-4" *ngIf="userProfile">
-              <h6 class="meta-section-title" style="font-weight: 700; color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px;">Informations Administrateur</h6>
-
-              <div class="d-flex align-items-center mb-3">
-                <div class="meta-icon d-flex align-items-center justify-content-center bg-light text-muted" style="width: 34px; height: 34px; border-radius: 50%; font-size: 14px; margin-right: 12px;">
-                  <i class="fa fa-user"></i>
-                </div>
-                <div>
-                  <span class="d-block text-muted" style="font-size: 10px; text-transform: uppercase;">Propriétaire</span>
-                  <strong class="text-dark" style="font-size: 13px;">{{ userProfile.fullName || 'Administrateur' }}</strong>
-                </div>
-              </div>
-
-              <div class="d-flex align-items-center">
-                <div class="meta-icon d-flex align-items-center justify-content-center bg-light text-muted" style="width: 34px; height: 34px; border-radius: 50%; font-size: 14px; margin-right: 12px;">
-                  <i class="fa fa-envelope"></i>
-                </div>
-                <div class="w-100 overflow-hidden">
-                  <span class="d-block text-muted" style="font-size: 10px; text-transform: uppercase;">Email</span>
-                  <strong class="text-dark d-block text-truncate" style="font-size: 13px;">{{ userProfile.email }}</strong>
-                </div>
-              </div>
-            </div>
-
-          </div>
+    <a href="/admin-panel/{{userId}}/qr-code"> see Preview URL </a>
         </div>
       </div>
 
-      <!-- Right Column: Settings Inputs for User Profile & Restaurant documents -->
-      <div class="col-lg-8 mb-4">
-        <div class="dashboard-card shadow-sm p-4 p-md-5 bg-white border bo-rad-10">
+      <!-- Right Column: Settings -->
+      <div class="col-lg-8">
+        <div class="dashboard-card p-5 bg-white border bo-rad-10">
 
-          <!-- Group 1: User Profile Settings (Saves directly to Users collection) -->
-          <div class="mb-4" *ngIf="userProfile">
-            <div class="d-flex align-items-center mb-4">
-              <div class="step-num bg-dark text-white mr-3 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; border-radius: 50%; font-weight: 700;">1</div>
-              <h4 class="form-group-title" style="font-weight: 700; color: #111; font-size: 18px; margin: 0;">Coordonnées du Profil</h4>
-            </div>
-
+          <!-- Contact Info -->
+          <div class="mb-5">
+            <h4 class="form-group-title">Coordonnées</h4>
             <div class="row g-3">
-              <div class="col-md-6 mb-3">
-                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #4b5563;">Nom Complet</label>
-                <div class="input-group">
-                  <span class="input-group-text bg-light border-end-0"><i class="fa fa-user text-muted"></i></span>
-                  <input type="text" class="form-control custom-input" [(ngModel)]="userProfile.fullName" name="fullName" placeholder="Votre nom" style="border-radius: 0 8px 8px 0; border-left: 0;" required>
-                </div>
+              <div class="col-md-6">
+                <label class="form-label">Email</label>
+                <input  title="jk" type="email" class="form-control custom-input" [(ngModel)]="userProfile!.email" name="email" readonly>
               </div>
+              <div class="col-md-6">
+                <label class="form-label">Téléphone</label>
+                <input type="tel" class="form-control custom-input" [(ngModel)]="userProfile!.phone" name="phone" placeholder="+216 XX XXX XXX">
+              </div>
+            </div>
+          </div>
 
-              <div class="col-md-6 mb-3">
-                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #4b5563;">Statut du Compte</label>
-                <div class="input-group">
-                  <span class="input-group-text bg-light border-end-0"><i class="fa fa-shield text-muted"></i></span>
-                  <input type="text" class="form-control custom-input" [(ngModel)]="userProfile.status" name="userStatus" placeholder="Statut" style="border-radius: 0 8px 8px 0; border-left: 0;" [disabled]="true" required>
+          <!-- Restaurant Info -->
+          <div class="mb-5">
+            <h4 class="form-group-title">Informations de l'Établissement</h4>
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label">Nom Commercial</label>
+                <input title="jk" type="text" class="form-control custom-input" [(ngModel)]="restaurantData.businessName" name="businessName">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Ville</label>
+                <input  title="jk" type="text" class="form-control custom-input" [(ngModel)]="restaurantData.city" name="city">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Adresse</label>
+                <input title="jk"  type="text" class="form-control custom-input" [(ngModel)]="restaurantData.address" name="address">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Description</label>
+                <textarea title="jk"  class="form-control custom-textarea" rows="3" [(ngModel)]="restaurantData.description" name="description"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Theme -->
+          <div class="mb-5">
+            <h4 class="form-group-title">Thème</h4>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Couleur Primaire</label>
+                <input title="jk"  type="color" [(ngModel)]="themeData.primaryColor" name="primaryColor" class="form-control form-control-color w-100">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Couleur Secondaire</label>
+                <input  title="jk"  type="color" [(ngModel)]="themeData.secondaryColor" name="secondaryColor" class="form-control form-control-color w-100">
+              </div>
+              <div class="col-12">
+                <div class="form-check form-switch mt-3">
+                  <input  title="jk"  class="form-check-input" type="checkbox" [(ngModel)]="themeData.darkMode" name="darkMode">
+                  <label class="form-check-label">Mode Sombre</label>
                 </div>
               </div>
             </div>
           </div>
 
-          <hr class="divider" style="border-top: 1px solid #f3f4f6; margin: 30px 0;">
-
-          <!-- Group 2: Restaurant Settings (Saves to Restaurants collection) -->
-          <div class="mb-4">
-            <div class="d-flex align-items-center mb-4">
-              <div class="step-num bg-dark text-white mr-3 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; border-radius: 50%; font-weight: 700;">2</div>
-              <h4 class="form-group-title" style="font-weight: 700; color: #111; font-size: 18px; margin: 0;">Détails de l'Établissement</h4>
-            </div>
-
-            <div class="row g-3">
-              <div class="col-12 mb-3">
-                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #4b5563;">Nom commercial de l'établissement</label>
-                <input type="text" class="form-control custom-input" [(ngModel)]="restaurantData.businessName" name="businessName" placeholder="Ex: Pato Place & Cafe" style="border-radius: 8px;" required>
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #4b5563;">Adresse Physique</label>
-                <input type="text" class="form-control custom-input" [(ngModel)]="restaurantData.address" name="address" style="border-radius: 8px;" placeholder="Ex: Rue de la Corniche">
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #4b5563;">Ville</label>
-                <input type="text" class="form-control custom-input" [(ngModel)]="restaurantData.city" name="city" style="border-radius: 8px;" placeholder="Ex: Sousse">
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #4b5563;">Devise de transaction</label>
-                <select class="form-select custom-input" [(ngModel)]="restaurantData.currency" name="currency" title="Devise" style="border-radius: 8px; height: 42px; font-size: 14px;">
-                  <option value="TND">🇹🇳 Dinar Tunisien (TND)</option>
-                  <option value="USD">🇺🇸 Dollar Américain (USD)</option>
-                  <option value="EUR">🇪🇺 Euro (EUR)</option>
-                </select>
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #4b5563;">Langue d'Affichage</label>
-                <select class="form-select custom-input" [(ngModel)]="restaurantData.language" name="language" title="Langue" style="border-radius: 8px; height: 42px; font-size: 14px;">
-                  <option value="fr">Français</option>
-                  <option value="ar">العربية (Arabe)</option>
-                  <option value="en">English</option>
-                </select>
-              </div>
-
-              <div class="col-12 mb-3">
-                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #4b5563;">Description / Bio</label>
-                <textarea class="form-control custom-textarea" rows="4" [(ngModel)]="restaurantData.description" name="description" placeholder="Présentez votre établissement en quelques mots..." style="border-radius: 8px;"></textarea>
-              </div>
-            </div>
-          </div>
-
-          <hr class="divider" style="border-top: 1px solid #f3f4f6; margin: 30px 0;">
-
-          <!-- Group 3: Theme Customization (Saves to Themes collection) -->
-          <div *ngIf="themeData">
-            <div class="d-flex align-items-center mb-4">
-              <div class="step-num bg-dark text-white mr-3 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; border-radius: 50%; font-weight: 700;">3</div>
-              <h4 class="form-group-title" style="font-weight: 700; color: #111; font-size: 18px; margin: 0;">Personnalisation du Thème</h4>
-            </div>
-
-            <div class="row g-3">
-              <div class="col-md-6 mb-3">
-                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #4b5563;">Couleur Primaire</label>
-                <div class="d-flex align-items-center gap-2">
-                  <input type="color" class="form-control form-control-color border-0 p-0" [(ngModel)]="themeData.primaryColor" name="primaryColor" title="Couleur Primaire" style="width: 50px; height: 40px; border-radius: 6px; cursor: pointer;">
-                  <input type="text" class="form-control custom-input" [(ngModel)]="themeData.primaryColor" name="primaryColorHex" placeholder="#d97706" style="border-radius: 8px;" required>
-                </div>
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #4b5563;">Couleur Secondaire</label>
-                <div class="d-flex align-items-center gap-2">
-                  <input type="color" class="form-control form-control-color border-0 p-0" [(ngModel)]="themeData.secondaryColor" name="secondaryColor" title="Couleur Secondaire" style="width: 50px; height: 40px; border-radius: 6px; cursor: pointer;">
-                  <input type="text" class="form-control custom-input" [(ngModel)]="themeData.secondaryColor" name="secondaryColorHex" placeholder="#78350f" style="border-radius: 8px;" required>
-                </div>
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #4b5563;">Couleur d'Arrière-plan</label>
-                <div class="d-flex align-items-center gap-2">
-                  <input type="color" class="form-control form-control-color border-0 p-0" [(ngModel)]="themeData.background" name="background" title="Couleur Arrière-plan" style="width: 50px; height: 40px; border-radius: 6px; cursor: pointer;">
-                  <input type="text" class="form-control custom-input" [(ngModel)]="themeData.background" name="backgroundHex" placeholder="#ffffff" style="border-radius: 8px;" required>
-                </div>
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #4b5563;">Couleur des Cartes</label>
-                <div class="d-flex align-items-center gap-2">
-                  <input type="color" class="form-control form-control-color border-0 p-0" [(ngModel)]="themeData.cardColor" name="cardColor" title="Couleur Cartes" style="width: 50px; height: 40px; border-radius: 6px; cursor: pointer;">
-                  <input type="text" class="form-control custom-input" [(ngModel)]="themeData.cardColor" name="cardColorHex" placeholder="#f8fafc" style="border-radius: 8px;" required>
-                </div>
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #4b5563;">Police de Caractères</label>
-                <select class="form-select custom-input" [(ngModel)]="themeData.font" name="font" title="Police" style="border-radius: 8px; height: 42px; font-size: 14px;">
-                  <option value="Inter">Inter</option>
-                  <option value="Outfit">Outfit</option>
-                  <option value="Roboto">Roboto</option>
-                  <option value="Montserrat">Montserrat</option>
-                  <option value="Playfair Display">Playfair Display</option>
-                </select>
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #4b5563;">Rayon de Bordure (Corners: {{ themeData.radius || 8 }}px)</label>
-                <div class="d-flex align-items-center h-100 align-items-center">
-                  <input title="Corners" type="range" class="form-range flex-grow-1" min="0" max="24" step="2" [(ngModel)]="themeData.radius" name="radius" style="cursor: pointer;">
-                </div>
-              </div>
-
-              <div class="col-12 mb-3 mt-3">
-                <div class="form-check form-switch d-flex align-items-center gap-3">
-                  <input class="form-check-input" type="checkbox" role="switch" id="darkModeSwitch" [(ngModel)]="themeData.darkMode" name="darkMode" style="width: 44px; height: 22px; cursor: pointer; margin: 0;">
-                  <label class="form-check-label font-weight-bold mb-0" for="darkModeSwitch" style="cursor: pointer; margin-left: 10px; font-size: 14px; color: #374151;">Activer le Mode Sombre (Dark Mode)</label>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Bottom Action Buttons inside the Settings Card -->
-          <div class="p-t-20 border-top mt-4 text-end">
-            <button type="submit" [disabled]="isSaving || !settingsForm.valid" class="btn btn-save" style="width: auto; padding: 12px 30px; font-size: 14px; font-weight: 700; border-radius: 8px;">
-              <span *ngIf="!isSaving"><i class="fa fa-save mr-2"></i> Sauvegarder les configurations</span>
-              <span *ngIf="isSaving"><i class="fa fa-spinner fa-spin mr-2"></i> Enregistrement en cours...</span>
+          <div class="text-end">
+            <button type="button" (click)="onSave()" [disabled]="isSaving" class="btn btn-save px-5 py-3">
+              {{ isSaving ? 'Enregistrement...' : 'Sauvegarder tout' }}
             </button>
           </div>
-
         </div>
       </div>
-
-    </form>
-
-    <!-- SECTION: Synced products displaying selected items matched to home design -->
-    <div class="title-section-ourmenu t-center m-t-60 m-b-30">
-      <span class="tit2 t-center">Consulter</span>
-      <h3 class="tit5 t-center m-t-2" style="font-size: 26px; font-weight: 800;">
-        Votre Carte Active ({{ addedProducts.length }} Produits)
-      </h3>
     </div>
 
-    <!-- If no products synced yet -->
-    <div *ngIf="addedProducts.length === 0" class="card border-0 shadow-sm p-5 text-center bo-rad-10 bg-white mb-5">
-      <div class="m-b-20">
-        <i class="fa fa-cutlery text-muted" style="font-size: 48px;"></i>
-      </div>
-      <h4 style="font-weight: 700; color: #374151; font-size: 18px;">Votre menu est vide pour le moment</h4>
-      <p class="text-muted m-b-30" style="font-size: 14px; max-width: 500px; margin-left: auto; margin-right: auto; line-height: 1.6;">
-        Vous n'avez sélectionné aucun produit dans votre espace. Cliquez sur le bouton ci-dessous pour gérer votre menu et ajouter des articles.
-      </p>
-      <div>
-        <a [routerLink]="['/admin-panel', userId, 'menu']" class="btn btn-save" style="width: auto; padding: 12px 24px; font-size: 14px; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px;">
-          <i class="fa fa-plus-circle"></i> Sélectionner des produits
-        </a>
-      </div>
-    </div>
-
-    <!-- If products are synced -->
-    <div *ngIf="addedProducts.length > 0" class="mb-5">
+    <!-- Active Menu Products -->
+    <div class="mt-5">
+      <h4 class="text-center mb-4">Votre Menu Actif ({{ addedProducts.length }} produits)</h4>
       <div class="row">
-        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 p-b-30" *ngFor="let meal of addedProducts">
-          <!-- Blo1 style from home page -->
-          <div class="blo1 bg-white bo-rad-10 overflow-hidden border trans-0-4 h-100 d-flex flex-column"
-               style="border-color: #e5e7eb; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); transition: all 0.3s;"
-               [style.opacity]="meal.visible ? '1' : '0.7'">
-
-            <div class="wrap-pic-blo1 bo-rad-10 hov-img-zoom pos-relative overflow-hidden" style="height: 160px;">
-              <img [src]="meal.image" [alt]="meal.name" style="width: 100%; height: 100%; object-fit: cover;" alt="jk" >
-
-              <span class="badge position-absolute"
-                    [class.bg-success]="meal.visible"
-                    [class.bg-warning]="!meal.visible"
-                    style="top: 10px; right: 10px; z-index: 10; font-size: 9px; padding: 3px 6px; border-radius: 4px; color: #fff; font-weight: bold;">
-                {{ meal.visible ? 'Visible' : 'Hidden' }}
-              </span>
-              <span class="badge bg-dark position-absolute"
-                    style="top: 10px; left: 10px; z-index: 10; font-size: 9px; padding: 3px 6px; border-radius: 4px; color: #fff; font-weight: bold;">
-                #{{ meal.displayOrder }}
-              </span>
-            </div>
-
-            <div class="wrap-text-blo1 p-t-15 p-b-15 p-l-15 p-r-15 d-flex flex-column flex-grow-1">
-              <h4 class="txt5 color0-hov trans-0-4 m-b-5" style="font-weight: 700; font-size: 15px; color: #1f2937;">
-                {{ meal.name }}
-              </h4>
-
-              <p class="m-b-10" style="font-size: 12px; color: #6b7280; line-height: 1.5; min-height: 36px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
-                {{ meal.description || 'Pas de description personnalisée.' }}
-              </p>
-
-              <div class="mt-auto d-flex justify-content-between align-items-center p-t-10" style="border-top: 1px dashed #f3f4f6;">
-                <span class="text-muted small">Tarif principal</span>
-                <span class="text-primary font-weight-bold" style="font-size: 14px;">{{ meal.price | number:'1.2-2' }} TND</span>
+        <div class="col-md-6 col-lg-4 col-xl-3 mb-4" *ngFor="let p of addedProducts">
+          <div class="card h-100 border-0 shadow-sm">
+            <img  alt="hu"  [src]="p.image || 'assets/placeholder-food.png'" class="card-img-top" style="height: 160px; object-fit: cover;">
+            <div class="card-body">
+              <h6 class="card-title">{{ p.name }}</h6>
+              <p class="text-muted small">{{ p.description | slice:0:80 }}...</p>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="fw-bold">{{ p.price }} TND</span>
+                <span class="badge" [class.bg-success]="p.visible" [class.bg-secondary]="!p.visible">
+                  {{ p.visible ? 'Visible' : 'Masqué' }}
+                </span>
               </div>
             </div>
-
           </div>
         </div>
       </div>
-
-      <!-- Center aligned manage menu CTA -->
-      <div class="text-center mt-3">
-        <a [routerLink]="['/admin-panel', userId, 'menu']" class="btn btn-save" style="width: auto; padding: 12px 30px; font-size: 14px; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px;">
-          <i class="fa fa-cog"></i> Gérer mon menu & ajouter des produits
-        </a>
-      </div>
     </div>
+
+    <!-- QR Code -->
+
 
   </div>
 </div>

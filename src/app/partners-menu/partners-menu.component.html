@@ -63,10 +63,40 @@
                 <textarea formControlName="description" rows="3" class="form-control" placeholder="Ex: Double dose de café pur arabica avec un arôme intense..." style="border-radius: 6px; padding: 8px 12px;" required></textarea>
               </div>
 
-              <div class="col-md-6 mb-3">
-                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #4b5563;">Lien Image (Optionnel)</label>
-                <input type="text" formControlName="image" class="form-control" placeholder="Ex: https://images.unsplash.com/... (ou vide pour défaut)" style="border-radius: 6px; padding: 8px 12px;" />
-              </div>
+             <!-- Inside the create form -->
+<div class="col-md-6 mb-3">
+  <label class="form-label" style="font-size: 12px; font-weight: 600; color: #4b5563;">
+    Image du Produit *
+  </label>
+
+  <div class="d-flex gap-2 align-items-center">
+    <input
+      title="gh"
+      type="file"
+      (change)="onImageSelected($event)"
+      accept="image/*"
+      class="form-control"
+      style="border-radius: 6px; padding: 8px 12px;" />
+
+    <button
+      type="button"
+      class="btn btn-outline-primary"
+      [disabled]="!selectedFile"
+      (click)="uploadToCloudinary()">
+      <i class="fa fa-upload"></i> Upload
+    </button>
+  </div>
+
+  <small *ngIf="uploadProgress > 0" class="text-muted">
+    Upload progress: {{ uploadProgress }}%
+  </small>
+
+  <div *ngIf="imagePreview" class="mt-2">
+    <img [src]="imagePreview" alt="Preview" style="max-height: 120px; border-radius: 8px; border: 1px solid #e5e7eb;">
+  </div>
+
+  <input type="hidden" formControlName="image" />
+</div>
 
               <div class="col-md-6 mb-3">
                 <label class="form-label" style="font-size: 12px; font-weight: 600; color: #4b5563;">Tailles Disponibles (Sélectionnez au moins une)</label>

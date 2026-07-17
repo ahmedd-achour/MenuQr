@@ -1,25 +1,20 @@
-
-
 <div
   class="qr-menu-wrapper"
-  [style.font-family]="theme?.font ? theme?.font + ', sans-serif' : 'Poppins, sans-serif'"
   [style.--primary-color]="theme?.primaryColor || '#222222'"
   [style.--secondary-color]="theme?.secondaryColor || '#b68834'"
   [style.--background-color]="theme?.background || '#f9f9ff'"
   [style.--card-color]="theme?.cardColor || '#ffffff'"
   [class.dark-theme]="theme?.darkMode">
 
-  <!-- Header Section -->
-
   <!-- Banner/Hero Section -->
-  <section class="banner-area" id="home" [style.background-image]="restaurant?.coverImage ? 'linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.65)), url(' + restaurant?.coverImage + ')' : null">
+  <section class="banner-area" id="home"
+           [style.background-image]="restaurant?.coverImage ?
+             'linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.65)), url(' + restaurant?.coverImage + ')' : null">
     <div class="container">
       <div class="row fullscreen d-flex align-items-center justify-content-start" style="min-height: 400px; padding: 100px 0;">
         <div class="banner-content col-lg-7">
           <h6 class="text-white text-uppercase">Now you can taste the quality</h6>
-          <h1>
-            {{ restaurant?.name || 'Welcome' }}
-          </h1>
+          <h1>{{ restaurant?.name || 'Welcome' }}</h1>
           <p class="text-white">
             {{ restaurant?.description || 'Start your day with a delicious meal and freshly brewed coffee.' }}
           </p>
@@ -29,12 +24,14 @@
   </section>
 
   <!-- Main Menu Area -->
-  <section class="menu-area section-gap" id="menu" style="padding: 60px 0;">
+  <section class="menu-area section-gap" id="menu" style="padding: 60px 0;" *ngIf="hasAccess">
     <div class="container">
       <div class="row d-flex justify-content-center">
         <div class="menu-content pb-60 col-lg-10 text-center">
           <div class="title text-center">
-            <h1 class="mb-10" [style.color]="theme?.primaryColor || '#222222'">it's all for you , you order - we serve</h1>
+            <h1 class="mb-10" [style.color]="theme?.primaryColor || '#222222'">
+              it's all for you , You order - We serve
+            </h1>
             <p class="text-muted">Fresh ingredients, delicious taste, prepared with care.</p>
           </div>
         </div>
@@ -49,7 +46,21 @@
       </div>
 
       <!-- Categories Filter Chips -->
-
+      <div *ngIf="!loading" class="categories-filter-wrapper">
+        <div class="categories-container">
+          <div class="category-chip"
+               [class.active]="selectedCategoryId === 'all'"
+               (click)="selectCategory('all')">
+            All
+          </div>
+          <div *ngFor="let cat of categories"
+               class="category-chip"
+               [class.active]="selectedCategoryId === cat.id"
+               (click)="selectCategory(cat.id)">
+            {{ cat.name }}
+          </div>
+        </div>
+      </div>
 
       <!-- Empty / Not Found View -->
       <div *ngIf="!loading && filteredProducts.length === 0" class="text-center py-5">
@@ -66,14 +77,15 @@
             <div class="product-img-wrapper">
               <img
                 [src]="product?.imageOverride || 'assets/placeholder-food.png'"
-                alt="product?.name"
+                alt="{{ product?.name }}"
                 loading="lazy">
             </div>
             <!-- Title and Price -->
             <div class="title-div justify-content-between d-flex align-items-center">
               <h4>{{ product?.name }}</h4>
               <p class="price float-right">
-                {{ product?.priceVariant }} <span style="font-size: 0.75rem; font-weight: 500;">DT</span>
+                {{ product?.priceVariant }}
+                <span style="font-size: 0.75rem; font-weight: 500;">DT</span>
               </p>
             </div>
             <!-- Description -->
@@ -87,8 +99,31 @@
     </div>
   </section>
 
+  <!-- === TRIAL ENDED / ACCESS DENIED SCREEN === -->
+  <div *ngIf="!loading && !hasAccess" class="trial-ended py-5 text-center">
+    <div style="font-size: 6rem; margin-bottom: 24px;">⏰</div>
+    <h2 style="color: var(--primary-color, #222222);">Free Trial Ended</h2>
+    <p class="lead text-muted" style="max-width: 500px; margin: 0 auto 32px;">
+      {{ trialMessage || 'Your free trial has ended. Please subscribe for continued access.' }}
+    </p>
+    <div
+       target="_blank"
+       style="background-color: var(--secondary-color, #b68834);
+              color: white;
+              padding: 16px 40px;
+              border-radius: 50px;
+              text-decoration: none;
+              font-weight: 600;
+              display: inline-block;">
+      Upgrade to Unlimited Access
+    </div>
+    <p class="text-muted mt-4 small">
+      Get full access to your custom QR menu and more professional features.
+    </p>
+  </div>
+
   <!-- Footer Section -->
-  <footer class="footer-area section-gap" style="padding: 60px 0; background-color: #04091e; color: #fff;">
+  <footer class="footer-area section-gap" style="padding: 60px 0; background-color: #04091e; color: #fff;" *ngIf="hasAccess">
     <div class="container">
       <div class="row">
         <div class="col-lg-5 col-md-6 col-sm-6">

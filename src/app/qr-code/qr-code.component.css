@@ -1,12 +1,12 @@
-/* Core Styling Matching Coffe1 Design */
+/* Core Styling Matching Coffe1 Design - Fully Themed */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 .qr-menu-wrapper {
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-family, 'Poppins', sans-serif);
   background-color: var(--background-color, #f9f9ff);
-  color: #222222;
+  color: var(--primary-color, #222222);
   min-height: 100vh;
-  padding-top: 80px; /* space for fixed header */
+  padding-top: 80px;
   box-sizing: border-box;
 }
 
@@ -50,10 +50,10 @@
   color: var(--secondary-color, #b68834);
 }
 
-/* Banner Area matching Coffe1 Hero look */
+/* Banner Area */
 .banner-area {
-  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.65)), url('/assets/teste1.jpg') center;
-  background-size: cover;
+  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.65)),
+              var(--banner-bg, url('/assets/teste1.jpg')) center/cover no-repeat;
   padding: 120px 0 100px 0;
   max-height: 200px;
   text-align: left;
@@ -82,7 +82,7 @@
   text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
 }
 
-/* Category Filter Chips styling */
+/* Category Filter Chips */
 .categories-filter-wrapper {
   margin: 40px 0 20px 0;
 }
@@ -92,15 +92,15 @@
   gap: 12px;
   overflow-x: auto;
   padding-bottom: 12px;
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none;
 }
 
 .categories-container::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
+  display: none;
 }
 
 .category-chip {
-  background: #ffffff;
+  background: var(--card-color, #ffffff);
   border: 1px solid var(--secondary-color, #b68834);
   color: var(--secondary-color, #b68834);
   padding: 10px 24px;
@@ -117,10 +117,10 @@
 .category-chip.active {
   background: var(--secondary-color, #b68834);
   color: #ffffff;
-  box-shadow: 0 10px 20px rgba(182, 136, 52, 0.2);
+  box-shadow: 0 10px 20px rgba(182, 136, 52, 0.25);
 }
 
-/* Single Menu Card design */
+/* Single Menu Card */
 .single-menu {
   background-color: var(--card-color, #ffffff);
   box-shadow: 0px 10px 30px 0px rgba(182, 136, 52, 0.15);
@@ -128,7 +128,7 @@
   padding: 20px;
   margin-bottom: 30px;
   transition: all 0.3s ease;
-  border: 1px solid rgba(182, 136, 52, 0.05);
+  border: 1px solid rgba(182, 136, 52, 0.08);
 }
 
 .single-menu:hover {
@@ -166,7 +166,7 @@
 .single-menu h4 {
   font-size: 1.15rem;
   font-weight: 700;
-  color: #222222;
+  color: var(--primary-color, #222222);
   margin: 0;
 }
 
@@ -184,6 +184,27 @@
   margin-bottom: 0;
 }
 
+/* Trial Ended Screen */
+.trial-ended {
+  padding: 100px 20px;
+  text-align: center;
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.trial-ended h2 {
+  color: var(--primary-color, #222222);
+  margin-bottom: 16px;
+}
+
+.trial-ended p {
+  max-width: 520px;
+  margin-bottom: 32px;
+}
+
 /* Dark Mode Overrides */
 .qr-menu-wrapper.dark-theme {
   --background-color: #121212;
@@ -192,12 +213,12 @@
 }
 
 .qr-menu-wrapper.dark-theme .single-menu {
-  border-color: rgba(255, 255, 255, 0.05);
-  box-shadow: 0px 10px 30px 0px rgba(0, 0, 0, 0.5);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0px 10px 30px 0px rgba(0, 0, 0, 0.6);
 }
 
 .qr-menu-wrapper.dark-theme .single-menu:hover {
-  box-shadow: 0px 15px 35px 0px rgba(0, 0, 0, 0.7);
+  box-shadow: 0px 15px 35px 0px rgba(0, 0, 0, 0.8);
 }
 
 .qr-menu-wrapper.dark-theme .single-menu h4 {
@@ -210,8 +231,11 @@
 
 .qr-menu-wrapper.dark-theme .category-chip {
   background: #222222;
+  border-color: var(--secondary-color);
+  color: var(--secondary-color);
 }
 
+.qr-menu-wrapper.dark-theme .category-chip:hover,
 .qr-menu-wrapper.dark-theme .category-chip.active {
   background: var(--secondary-color, #b68834);
   color: #ffffff;
