@@ -1,59 +1,38 @@
-	<!-- Header desktop -->
-	<div class=" gradient1 trans-0-4">
-		<div class="container h-full">
-			<div class="wrap_header trans-0-3">
-				<!-- Logo -->
-				<div class="logo">
-					<a href="index.html">
-						<img src="../../assets/logo.png" alt="IMG-LOGO" data-logofixed="../../assets/logo.png">
-					</a>
-				</div>
+<header class="app-header">
+  <div class="container">
 
-				<!-- Menu -->
-				<div class="wrap_menu p-l-45 p-l-0-xl">
-					<nav class="menu">
-						<ul class="main_menu">
-							<li>
-								<a href="index.html">Home</a>
-							</li>
+    <div class="navbar-custom">
 
+      <!-- Logo -->
+      <a class="logo" routerLink="/">
+        <img src="../../assets/logo.png" alt="Logo">
+      </a>
 
+      <!-- Desktop Menu -->
+      <nav class="desktop-menu">
+        <a routerLink="/">Home</a>
+        <a routerLink="/policy">Policy</a>
+        <a routerLink="/register">Register</a>
+        <a routerLink="/contact">Contact</a>
+      </nav>
 
-          <!--
+      <!-- Mobile Hamburger -->
+      <button
+        class="menu-btn"
+        (click)="isMenuOpen = !isMenuOpen"
+        aria-label="Toggle navigation">
+        <i class="fa" [class.fa-times]="isMenuOpen" [class.fa-bars]="!isMenuOpen"></i>
+      </button>
 
-          	<li>
-								<a href="/reservation">Reservation</a>
-							</li>
+    </div>
 
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" [class.show]="isMenuOpen">
+      <a routerLink="/" (click)="isMenuOpen=false">Home</a>
+      <a routerLink="/policy" (click)="isMenuOpen=false">Policy</a>
+      <a routerLink="/register" (click)="isMenuOpen=false">Register</a>
+      <a routerLink="/contact" (click)="isMenuOpen=false">Contact</a>
+    </div>
 
-          -->
-
-
-
-
-							<li>
-								<a href="/policy">Policy</a>
-							</li>
-
-							<li>
-								<a href="/register">Register</a>
-							</li>
-
-							<li>
-								<a href="/contact">Contact</a>
-							</li>
-						</ul>
-					</nav>
-				</div>
-
-				<!-- Social -->
-				<div class="social flex-w flex-l-m p-r-20">
-					<a href="#"><i class="fa fa-tripadvisor" aria-hidden="true"></i></a>
-					<a href="#"><i class="fa fa-facebook m-l-21" aria-hidden="true"></i></a>
-					<a href="#"><i class="fa fa-twitter m-l-21" aria-hidden="true"></i></a>
-
-					<button class="btn-show-sidebar m-l-33 trans-0-4">.</button>
-				</div>
-			</div>
-		</div>
-	</div>
+  </div>
+</header>
