@@ -81,7 +81,7 @@
               <div class="phone-menu-area py-3" [style.backgroundColor]="editTheme.background || '#f9f9ff'">
                 <div class="text-center px-2 mb-3">
                   <h2 style="font-size: 11px; font-weight: 700; color: var(--primary-color, #222222); margin-bottom: 2px;">
-                    it's all for you , You order - We serve
+              {{restaurantData.description}}
                   </h2>
                   <p class="text-muted" style="font-size: 8px; margin: 0;">Fresh ingredients, delicious taste, prepared with care.</p>
                 </div>
@@ -160,6 +160,8 @@
 
       <!-- Right side: Control Settings Panel -->
       <div class="settings-column">
+        -
+        <p>-</p>
 
         <div class="dashboard-form-card p-4 p-md-5">
           <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom">
