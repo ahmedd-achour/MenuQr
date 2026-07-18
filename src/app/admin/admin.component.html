@@ -1,227 +1,499 @@
 <div class="admin-shell">
+  <div class="sidebar-backdrop" (click)="closeSidebar()"></div>
 
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-brand">
-      <span class="brand-icon">⚡</span>
-      <span class="brand-name">MenuQR Admin</span>
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <aside class="admin-sidebar" id="adminSidebar" [class.sidebar-mini]="sidebarMini">
+    <div class="sidebar-header">
+      <a class="brand-mark" href="#">
+        <span class="brand-icon"><i class="bi bi-grid-1x2-fill"></i></span>
+        <span class="brand-copy">
+          <span class="brand-title">MenuQR</span>
+          <span class="brand-subtitle">Super Admin</span>
+        </span>
+      </a>
     </div>
+
     <nav class="sidebar-nav">
-      <button class="nav-item" [class.active]="activeTab === 'users'" (click)="activeTab = 'users'">
-        <span class="nav-icon">👥</span> Manage Users
-      </button>
-      <button class="nav-item" [class.active]="activeTab === 'products'" (click)="activeTab = 'products'">
-        <span class="nav-icon">🍽️</span> Manage Products
-      </button>
+      <a class="nav-link" [class.active]="activeTab === 'dashboard'" (click)="activeTab = 'dashboard'">
+        <span class="nav-icon"><i class="bi bi-speedometer2"></i></span>
+        <span class="nav-text">Dashboard</span>
+      </a>
+      <a class="nav-link" [class.active]="activeTab === 'users'" (click)="activeTab = 'users'">
+        <span class="nav-icon"><i class="bi bi-people"></i></span>
+        <span class="nav-text">Manage Users</span>
+      </a>
+      <a class="nav-link" [class.active]="activeTab === 'products'" (click)="activeTab = 'products'">
+        <span class="nav-icon"><i class="bi bi-shop"></i></span>
+        <span class="nav-text">Manage Products</span>
+      </a>
+      <a class="nav-link text-danger mt-3" (click)="logout()" style="cursor: pointer; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1rem;">
+        <span class="nav-icon"><i class="bi bi-box-arrow-right"></i></span>
+        <span class="nav-text">Sign Out</span>
+      </a>
     </nav>
+
+    <div class="sidebar-user">
+      <i class="bi bi-person-circle" style="font-size:2rem;color:#ccc;"></i>
+      <strong>Super Admin</strong>
+      <small>Active Workspace</small>
+    </div>
+
+    <div class="sidebar-footer">
+      <span class="status-dot"></span>
+      <span class="sidebar-footer-text">System running smoothly</span>
+    </div>
   </aside>
 
-  <!-- Main -->
-  <main class="main-content">
+  <!-- ═══════════════ MAIN ═══════════════ -->
+  <div class="admin-main">
 
-    <!-- Toast -->
-    <div class="toast success" *ngIf="successMsg">✅ {{ successMsg }}</div>
-    <div class="toast error" *ngIf="errorMsg">❌ {{ errorMsg }}</div>
-
-    <!-- ═══════════════════════════════════════ USERS TAB ═══════════════ -->
-    <section *ngIf="activeTab === 'users'">
-      <div class="page-header">
-        <h2>Manage Users</h2>
-        <span class="badge">{{ users.length }} total</span>
+    <!-- Navbar -->
+    <nav class="navbar admin-navbar navbar-expand bg-white">
+      <div class="container-fluid px-3 px-lg-4">
+        <button class="sidebar-toggle" type="button" (click)="toggleSidebar()">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="navbar-actions ms-auto d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-person-circle text-secondary" style="font-size: 1.5rem;"></i>
+            <span class="profile-name d-none d-sm-inline fw-semibold text-dark">Super Admin</span>
+          </div>
+          <button class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1" (click)="logout()">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Sign Out</span>
+          </button>
+        </div>
       </div>
+    </nav>
 
-      <div class="table-card">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Verified</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let user of users">
-              <td class="fw">{{ user.fullName || '—' }}</td>
-              <td>{{ user.email }}</td>
-              <td>{{ user.phone || '—' }}</td>
-              <td><span class="chip chip-role">{{ user.role }}</span></td>
-              <td><span class="chip" [class.chip-active]="user.status === 'active'" [class.chip-off]="user.status !== 'active'">{{ user.status }}</span></td>
-              <td>
-                <button class="toggle-btn" [class.on]="user.isVerified" (click)="toggleVerified(user)" [title]="user.isVerified ? 'Click to unverify' : 'Click to verify'">
-                  {{ user.isVerified ? '✅ Verified' : '🔒 Blocked' }}
-                </button>
-              </td>
-              <td>
-                <button class="btn-edit" (click)="openEditUser(user)">Edit</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <!-- Alerts -->
+    <div class="container-fluid px-3 px-lg-4 pt-3" *ngIf="successMsg || errorMsg">
+      <div class="alert alert-success alert-dismissible" *ngIf="successMsg">
+        <i class="bi bi-check-circle-fill me-2"></i>{{ successMsg }}
+        <button type="button" class="btn-close" (click)="successMsg = ''"></button>
       </div>
+      <div class="alert alert-danger alert-dismissible" *ngIf="errorMsg">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMsg }}
+        <button type="button" class="btn-close" (click)="errorMsg = ''"></button>
+      </div>
+    </div>
 
-      <!-- Edit User Modal -->
-      <div class="modal-overlay" *ngIf="editingUser" (click)="cancelEditUser()">
-        <div class="modal-box" (click)="$event.stopPropagation()">
-          <h3>Edit User</h3>
+    <main class="dashboard-content">
+      <div class="container-fluid px-3 px-lg-4 py-4">
 
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Full Name</label>
-              <input [(ngModel)]="editingUser.fullName" placeholder="Full name" />
-            </div>
-            <div class="form-group">
-              <label>Email</label>
-              <input [(ngModel)]="editingUser.email" placeholder="Email" />
-            </div>
-            <div class="form-group">
-              <label>Phone</label>
-              <input [(ngModel)]="editingUser.phone" placeholder="Phone" />
-            </div>
-            <div class="form-group">
-              <label>Role</label>
-              <select [(ngModel)]="editingUser.role">
-                <option value="owner">Owner</option>
-                <option value="admin">Admin</option>
-                <option value="client">Client</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Status</label>
-              <select [(ngModel)]="editingUser.status">
-                <option value="active">Active</option>
-                <option value="suspended">Suspended</option>
-                <option value="inactive">Inactive</option>
-              </select>
+        <!-- ═══════════ DASHBOARD TAB ═══════════ -->
+        <ng-container *ngIf="activeTab === 'dashboard'">
+          <div class="page-heading">
+            <div class="page-heading-copy">
+              <span class="page-icon"><i class="bi bi-speedometer2"></i></span>
+              <div>
+                <p class="eyebrow mb-1">Overview</p>
+                <h1 class="h3 mb-1">Dashboard</h1>
+                <p class="text-muted mb-0">Monitor users and products from one workspace.</p>
+              </div>
             </div>
           </div>
 
-          <div class="toggle-row">
-            <label class="switch-label">
-              <span>Verified <small>(can access their interface)</small></span>
-              <label class="switch">
-                <input type="checkbox" [(ngModel)]="editingUser.isVerified" />
-                <span class="slider"></span>
-              </label>
-            </label>
-            <label class="switch-label">
-              <span>Is Admin</span>
-              <label class="switch">
-                <input type="checkbox" [(ngModel)]="editingUser.isAdmin" />
-                <span class="slider"></span>
-              </label>
-            </label>
+          <!-- Metric Cards -->
+          <section class="row g-3 mt-1">
+            <div class="col-12 col-sm-6 col-xl-3">
+              <article class="metric-card metric-primary">
+                <div class="metric-top">
+                  <span class="metric-label">Total Users</span>
+                  <span class="metric-icon"><i class="bi bi-people"></i></span>
+                </div>
+                <div class="metric-value">{{ users.length }}</div>
+                <div class="metric-meta">
+                  <span class="text-success">{{ paidCount }}</span>
+                  <span>paid users</span>
+                </div>
+              </article>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+              <article class="metric-card metric-success">
+                <div class="metric-top">
+                  <span class="metric-label">Active Restaurants</span>
+                  <span class="metric-icon"><i class="bi bi-shop"></i></span>
+                </div>
+                <div class="metric-value">{{ activeRestaurantsCount }}</div>
+                <div class="metric-meta">
+                  <span class="text-success">of {{ restaurants.length }}</span>
+                  <span>total</span>
+                </div>
+              </article>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+              <article class="metric-card metric-warning">
+                <div class="metric-top">
+                  <span class="metric-label">Active 15-day Trial</span>
+                  <span class="metric-icon"><i class="bi bi-clock-history"></i></span>
+                </div>
+                <div class="metric-value">{{ trialCount }}</div>
+                <div class="metric-meta">
+                  <span class="text-warning">users</span>
+                  <span>in trial phase</span>
+                </div>
+              </article>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+              <article class="metric-card metric-danger">
+                <div class="metric-top">
+                  <span class="metric-label">Expired & Blocked</span>
+                  <span class="metric-icon"><i class="bi bi-shield-lock"></i></span>
+                </div>
+                <div class="metric-value">{{ blockedCount }}</div>
+                <div class="metric-meta">
+                  <span class="text-danger">unpaid users</span>
+                  <span>access blocked</span>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <!-- Recent Users table on dashboard -->
+          <section class="panel mt-4">
+            <div class="panel-header">
+              <div>
+                <h2 class="h5 mb-1 section-title"><i class="bi bi-people"></i><span>Recent Users</span></h2>
+                <p class="text-muted mb-0">Latest registered accounts.</p>
+              </div>
+              <button class="btn btn-outline-secondary btn-sm" (click)="activeTab = 'users'">Manage Users</button>
+            </div>
+            <div class="table-responsive">
+              <table class="table align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Access State</th>
+                    <th class="text-end">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let user of users | slice:0:5">
+                    <td>
+                      <div class="d-flex align-items-center gap-2">
+                        <div class="avatar-placeholder"><i class="bi bi-person-circle" style="font-size:1.6rem;color:#aaa;"></i></div>
+                        <div>
+                          <p class="fw-semibold mb-0">{{ user.fullName || '—' }}</p>
+                          <p class="text-muted small mb-0">{{ user.email }}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td>{{ user.role }}</td>
+                    <td>
+                      <span class="badge" [class.text-bg-success]="user.status === 'active'" [class.text-bg-secondary]="user.status !== 'active'">
+                        {{ user.status }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="badge" 
+                            [class.text-bg-success]="user.paid" 
+                            [class.text-bg-warning]="!user.paid && !isUserBlocked(user)" 
+                            [class.text-bg-danger]="!user.paid && isUserBlocked(user)">
+                        {{ user.paid ? 'Paid' : (isUserBlocked(user) ? 'Blocked' : 'Trial') }}
+                      </span>
+                    </td>
+                    <td class="text-end">
+                      <button class="btn btn-light btn-sm" (click)="openEditUser(user); activeTab = 'users'">Edit</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </ng-container>
+
+        <!-- ═══════════ USERS TAB ═══════════ -->
+        <ng-container *ngIf="activeTab === 'users'">
+          <div class="page-heading">
+            <div class="page-heading-copy">
+              <span class="page-icon"><i class="bi bi-people"></i></span>
+              <div>
+                <p class="eyebrow mb-1">Administration</p>
+                <h1 class="h3 mb-1">Manage Users</h1>
+                <p class="text-muted mb-0">{{ users.length }} total accounts registered.</p>
+              </div>
+            </div>
           </div>
 
-          <div class="modal-actions">
-            <button class="btn-cancel" (click)="cancelEditUser()">Cancel</button>
-            <button class="btn-save" (click)="saveUser()" [disabled]="saving">
-              {{ saving ? 'Saving…' : 'Save Changes' }}
-            </button>
+          <section class="panel mt-3">
+            <div class="panel-header">
+              <div>
+                <h2 class="h5 mb-1 section-title"><i class="bi bi-people"></i><span>All Users</span></h2>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Phone</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Paid Access</th>
+                    <th class="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let user of users">
+                    <td>
+                      <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-person-circle" style="font-size:1.6rem;color:#aaa;"></i>
+                        <div>
+                          <p class="fw-semibold mb-0">{{ user.fullName || '—' }}</p>
+                          <p class="text-muted small mb-0">{{ user.email }}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td>{{ user.phone || '—' }}</td>
+                    <td><span class="badge text-bg-primary">{{ user.role }}</span></td>
+                    <td>
+                      <span class="badge" [class.text-bg-success]="user.status === 'active'" [class.text-bg-secondary]="user.status !== 'active'">
+                        {{ user.status }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" [checked]="user.paid" (change)="togglePaid(user)" [id]="'p-' + user.id">
+                        <label class="form-check-label" [for]="'p-' + user.id">
+                          <small [class.text-success]="user.paid" [class.text-warning]="!user.paid && !isUserBlocked(user)" [class.text-danger]="!user.paid && isUserBlocked(user)">
+                            {{ user.paid ? 'Paid' : (isUserBlocked(user) ? 'Expired' : 'Trial') }}
+                          </small>
+                        </label>
+                      </div>
+                      <div *ngIf="!user.paid" style="font-size: 0.72rem; color: #888; margin-top: 2px;">
+                        Ends: {{ formatTrialEnd(user) }}
+                      </div>
+                    </td>
+                    <td class="text-end">
+                      <button class="btn btn-light btn-sm me-1" (click)="openEditUser(user)">
+                        <i class="bi bi-pencil"></i> Edit
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </ng-container>
+
+        <!-- ═══════════ PRODUCTS TAB ═══════════ -->
+        <ng-container *ngIf="activeTab === 'products'">
+          <div class="page-heading">
+            <div class="page-heading-copy">
+              <span class="page-icon"><i class="bi bi-shop"></i></span>
+              <div>
+                <p class="eyebrow mb-1">Administration</p>
+                <h1 class="h3 mb-1">Manage Products</h1>
+                <p class="text-muted mb-0">{{ restaurants.length }} restaurants — {{ activeRestaurantsCount }} visible to customers.</p>
+              </div>
+            </div>
+          </div>
+
+          <section class="panel mt-3">
+            <div class="panel-header">
+              <div>
+                <h2 class="h5 mb-1 section-title"><i class="bi bi-shop"></i><span>All Restaurants</span></h2>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>Business</th>
+                    <th>City</th>
+                    <th>Type</th>
+                    <th>License</th>
+                    <th>Active (visible)</th>
+                    <th class="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let r of restaurants">
+                    <td>
+                      <p class="fw-semibold mb-0">{{ r.businessName }}</p>
+                      <p class="text-muted small mb-0">{{ r.email }}</p>
+                    </td>
+                    <td>{{ r.city || '—' }}</td>
+                    <td><span class="badge text-bg-primary">{{ r.type }}</span></td>
+                    <td>
+                      <span class="badge"
+                        [class.text-bg-success]="r.licenseStatus === 'active'"
+                        [class.text-bg-warning]="r.licenseStatus === 'trial'"
+                        [class.text-bg-danger]="r.licenseStatus === 'expired' || r.licenseStatus === 'suspended'"
+                        [class.text-bg-secondary]="!r.licenseStatus">
+                        {{ r.licenseStatus || 'N/A' }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" [checked]="r.active" (change)="toggleActive(r)" [id]="'a-' + r.id">
+                        <label class="form-check-label" [for]="'a-' + r.id">
+                          <small [class.text-success]="r.active" [class.text-danger]="!r.active">
+                            {{ r.active ? 'Visible' : 'Hidden' }}
+                          </small>
+                        </label>
+                      </div>
+                    </td>
+                    <td class="text-end">
+                      <button class="btn btn-light btn-sm" (click)="openEditRestaurant(r)">
+                        <i class="bi bi-pencil"></i> Edit
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </ng-container>
+
+      </div>
+    </main>
+
+    <footer class="admin-footer">
+      <div class="container-fluid px-3 px-lg-4">
+        <span>MenuQR Admin Panel &copy; {{ currentYear }}</span>
+        <span>Super Administration</span>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<!-- ═══════════ EDIT USER MODAL ═══════════ -->
+<div class="modal fade show d-block" tabindex="-1" *ngIf="editingUser" style="background:rgba(0,0,0,0.5);">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-person-gear me-2"></i>Edit User</h5>
+        <button type="button" class="btn-close" (click)="cancelEditUser()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Full Name</label>
+            <input class="form-control" [(ngModel)]="editingUser.fullName" placeholder="Full name" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Email</label>
+            <input class="form-control" [(ngModel)]="editingUser.email" placeholder="Email" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Phone</label>
+            <input class="form-control" [(ngModel)]="editingUser.phone" placeholder="Phone" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Role</label>
+            <select class="form-select" [(ngModel)]="editingUser.role">
+              <option value="owner">Owner</option>
+              <option value="admin">Admin</option>
+              <option value="client">Client</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Status</label>
+            <select class="form-select" [(ngModel)]="editingUser.status">
+              <option value="active">Active</option>
+              <option value="suspended">Suspended</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+
+        <hr>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="editPaid" [(ngModel)]="editingUser.paid">
+              <label class="form-check-label fw-semibold" for="editPaid">
+                Paid Access <small class="text-muted">(unlimited if checked)</small>
+              </label>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="editIsAdmin" [(ngModel)]="editingUser.isAdmin">
+              <label class="form-check-label fw-semibold" for="editIsAdmin">
+                Is Super Admin
+              </label>
+            </div>
+          </div>
+          <div class="col-md-6" *ngIf="!editingUser.paid">
+            <label class="form-label fw-semibold">Trial End Date</label>
+            <input class="form-control" type="date" [(ngModel)]="editingUser.trialEndsAtStr" />
           </div>
         </div>
       </div>
-    </section>
-
-    <!-- ═══════════════════════════════════════ PRODUCTS TAB ═══════════════ -->
-    <section *ngIf="activeTab === 'products'">
-      <div class="page-header">
-        <h2>Manage Products (Restaurants)</h2>
-        <span class="badge">{{ restaurants.length }} total</span>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="cancelEditUser()">Cancel</button>
+        <button class="btn btn-primary" (click)="saveUser()" [disabled]="saving">
+          <span class="spinner-border spinner-border-sm me-1" *ngIf="saving"></span>
+          {{ saving ? 'Saving…' : 'Save Changes' }}
+        </button>
       </div>
+    </div>
+  </div>
+</div>
 
-      <div class="table-card">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Business Name</th>
-              <th>Email</th>
-              <th>City</th>
-              <th>Type</th>
-              <th>License</th>
-              <th>Active</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let r of restaurants">
-              <td class="fw">{{ r.businessName }}</td>
-              <td>{{ r.email }}</td>
-              <td>{{ r.city || '—' }}</td>
-              <td><span class="chip chip-role">{{ r.type }}</span></td>
-              <td><span class="chip" [class.chip-active]="r.licenseStatus === 'active'" [class.chip-off]="r.licenseStatus !== 'active'">{{ r.licenseStatus }}</span></td>
-              <td>
-                <button class="toggle-btn" [class.on]="r.active" (click)="toggleActive(r)" [title]="r.active ? 'Click to deactivate' : 'Click to activate'">
-                  {{ r.active ? '🟢 Visible' : '🔴 Hidden' }}
-                </button>
-              </td>
-              <td>
-                <button class="btn-edit" (click)="openEditRestaurant(r)">Edit</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+<!-- ═══════════ EDIT RESTAURANT MODAL ═══════════ -->
+<div class="modal fade show d-block" tabindex="-1" *ngIf="editingRestaurant" style="background:rgba(0,0,0,0.5);">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-shop me-2"></i>Edit Restaurant</h5>
+        <button type="button" class="btn-close" (click)="cancelEditRestaurant()"></button>
       </div>
-
-      <!-- Edit Restaurant Modal -->
-      <div class="modal-overlay" *ngIf="editingRestaurant" (click)="cancelEditRestaurant()">
-        <div class="modal-box" (click)="$event.stopPropagation()">
-          <h3>Edit Restaurant</h3>
-
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Business Name</label>
-              <input [(ngModel)]="editingRestaurant.businessName" placeholder="Business name" />
-            </div>
-            <div class="form-group">
-              <label>Email</label>
-              <input [(ngModel)]="editingRestaurant.email" placeholder="Email" />
-            </div>
-            <div class="form-group">
-              <label>Phone</label>
-              <input [(ngModel)]="editingRestaurant.phone" placeholder="Phone" />
-            </div>
-            <div class="form-group">
-              <label>City</label>
-              <input [(ngModel)]="editingRestaurant.city" placeholder="City" />
-            </div>
-            <div class="form-group">
-              <label>Type</label>
-              <input [(ngModel)]="editingRestaurant.type" placeholder="e.g. coffee, restaurant" />
-            </div>
-            <div class="form-group">
-              <label>License Status</label>
-              <select [(ngModel)]="editingRestaurant.licenseStatus">
-                <option value="trial">Trial</option>
-                <option value="active">Active</option>
-                <option value="expired">Expired</option>
-                <option value="suspended">Suspended</option>
-              </select>
-            </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Business Name</label>
+            <input class="form-control" [(ngModel)]="editingRestaurant.businessName" />
           </div>
-
-          <div class="toggle-row">
-            <label class="switch-label">
-              <span>Active <small>(visible to customers)</small></span>
-              <label class="switch">
-                <input type="checkbox" [(ngModel)]="editingRestaurant.active" />
-                <span class="slider"></span>
-              </label>
-            </label>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Email</label>
+            <input class="form-control" [(ngModel)]="editingRestaurant.email" />
           </div>
-
-          <div class="modal-actions">
-            <button class="btn-cancel" (click)="cancelEditRestaurant()">Cancel</button>
-            <button class="btn-save" (click)="saveRestaurant()" [disabled]="saving">
-              {{ saving ? 'Saving…' : 'Save Changes' }}
-            </button>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Phone</label>
+            <input class="form-control" [(ngModel)]="editingRestaurant.phone" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">City</label>
+            <input class="form-control" [(ngModel)]="editingRestaurant.city" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Type</label>
+            <input class="form-control" [(ngModel)]="editingRestaurant.type" placeholder="e.g. coffee, restaurant" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">License Status</label>
+            <select class="form-select" [(ngModel)]="editingRestaurant.licenseStatus">
+              <option value="trial">Trial</option>
+              <option value="active">Active</option>
+              <option value="expired">Expired</option>
+              <option value="suspended">Suspended</option>
+            </select>
           </div>
         </div>
+        <hr>
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" id="editActive" [(ngModel)]="editingRestaurant.active">
+          <label class="form-check-label fw-semibold" for="editActive">
+            Active <small class="text-muted">(visible to customers)</small>
+          </label>
+        </div>
       </div>
-    </section>
-
-  </main>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="cancelEditRestaurant()">Cancel</button>
+        <button class="btn btn-primary" (click)="saveRestaurant()" [disabled]="saving">
+          <span class="spinner-border spinner-border-sm me-1" *ngIf="saving"></span>
+          {{ saving ? 'Saving…' : 'Save Changes' }}
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

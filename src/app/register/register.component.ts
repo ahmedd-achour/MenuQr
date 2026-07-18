@@ -67,6 +67,8 @@ export class RegisterComponent {
         createdAt: new Date(),
         lastLogin: new Date(),
         isVerified: false,
+        paid: false,
+        trialEndsAt: this.addDays(new Date(), 15),
         isAdmin: false,
         status: "active",
         currentRestaurantId: "",
