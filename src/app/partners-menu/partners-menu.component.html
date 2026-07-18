@@ -1,8 +1,11 @@
 <app-header-partner [userId]="userId"></app-header-partner>
+  -
+    <p>-</p>
 <div class="partners-dashboard container-fluid px-md-5 px-3 p-t-30 p-b-50">
 
 
   <div class="row align-items-stretch">
+
     <!-- Sidebar Categories Column -->
     <aside class="col-lg-3 col-md-4 col-sm-12 m-b-30">
       <div class="sidebar-categories card border-0 shadow-sm p-4 bo-rad-10 bg-white">
@@ -330,7 +333,7 @@
             </div>
           </div>
         </div>
-        
+
         <!-- Pagination Controls for Read Optimization -->
         <div class="text-center mt-3 mb-4" *ngIf="hasMoreCategoryProducts">
           <button type="button" class="btn btn-save px-4 py-2 me-2" style="width: auto; border-radius: 6px; font-weight: 600;" (click)="loadMoreCategoryProducts()">
