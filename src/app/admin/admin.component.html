@@ -1,0 +1,227 @@
+<div class="admin-shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon">⚡</span>
+      <span class="brand-name">MenuQR Admin</span>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item" [class.active]="activeTab === 'users'" (click)="activeTab = 'users'">
+        <span class="nav-icon">👥</span> Manage Users
+      </button>
+      <button class="nav-item" [class.active]="activeTab === 'products'" (click)="activeTab = 'products'">
+        <span class="nav-icon">🍽️</span> Manage Products
+      </button>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+
+    <!-- Toast -->
+    <div class="toast success" *ngIf="successMsg">✅ {{ successMsg }}</div>
+    <div class="toast error" *ngIf="errorMsg">❌ {{ errorMsg }}</div>
+
+    <!-- ═══════════════════════════════════════ USERS TAB ═══════════════ -->
+    <section *ngIf="activeTab === 'users'">
+      <div class="page-header">
+        <h2>Manage Users</h2>
+        <span class="badge">{{ users.length }} total</span>
+      </div>
+
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Verified</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users">
+              <td class="fw">{{ user.fullName || '—' }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.phone || '—' }}</td>
+              <td><span class="chip chip-role">{{ user.role }}</span></td>
+              <td><span class="chip" [class.chip-active]="user.status === 'active'" [class.chip-off]="user.status !== 'active'">{{ user.status }}</span></td>
+              <td>
+                <button class="toggle-btn" [class.on]="user.isVerified" (click)="toggleVerified(user)" [title]="user.isVerified ? 'Click to unverify' : 'Click to verify'">
+                  {{ user.isVerified ? '✅ Verified' : '🔒 Blocked' }}
+                </button>
+              </td>
+              <td>
+                <button class="btn-edit" (click)="openEditUser(user)">Edit</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Edit User Modal -->
+      <div class="modal-overlay" *ngIf="editingUser" (click)="cancelEditUser()">
+        <div class="modal-box" (click)="$event.stopPropagation()">
+          <h3>Edit User</h3>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input [(ngModel)]="editingUser.fullName" placeholder="Full name" />
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input [(ngModel)]="editingUser.email" placeholder="Email" />
+            </div>
+            <div class="form-group">
+              <label>Phone</label>
+              <input [(ngModel)]="editingUser.phone" placeholder="Phone" />
+            </div>
+            <div class="form-group">
+              <label>Role</label>
+              <select [(ngModel)]="editingUser.role">
+                <option value="owner">Owner</option>
+                <option value="admin">Admin</option>
+                <option value="client">Client</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select [(ngModel)]="editingUser.status">
+                <option value="active">Active</option>
+                <option value="suspended">Suspended</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="toggle-row">
+            <label class="switch-label">
+              <span>Verified <small>(can access their interface)</small></span>
+              <label class="switch">
+                <input type="checkbox" [(ngModel)]="editingUser.isVerified" />
+                <span class="slider"></span>
+              </label>
+            </label>
+            <label class="switch-label">
+              <span>Is Admin</span>
+              <label class="switch">
+                <input type="checkbox" [(ngModel)]="editingUser.isAdmin" />
+                <span class="slider"></span>
+              </label>
+            </label>
+          </div>
+
+          <div class="modal-actions">
+            <button class="btn-cancel" (click)="cancelEditUser()">Cancel</button>
+            <button class="btn-save" (click)="saveUser()" [disabled]="saving">
+              {{ saving ? 'Saving…' : 'Save Changes' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ PRODUCTS TAB ═══════════════ -->
+    <section *ngIf="activeTab === 'products'">
+      <div class="page-header">
+        <h2>Manage Products (Restaurants)</h2>
+        <span class="badge">{{ restaurants.length }} total</span>
+      </div>
+
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Business Name</th>
+              <th>Email</th>
+              <th>City</th>
+              <th>Type</th>
+              <th>License</th>
+              <th>Active</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of restaurants">
+              <td class="fw">{{ r.businessName }}</td>
+              <td>{{ r.email }}</td>
+              <td>{{ r.city || '—' }}</td>
+              <td><span class="chip chip-role">{{ r.type }}</span></td>
+              <td><span class="chip" [class.chip-active]="r.licenseStatus === 'active'" [class.chip-off]="r.licenseStatus !== 'active'">{{ r.licenseStatus }}</span></td>
+              <td>
+                <button class="toggle-btn" [class.on]="r.active" (click)="toggleActive(r)" [title]="r.active ? 'Click to deactivate' : 'Click to activate'">
+                  {{ r.active ? '🟢 Visible' : '🔴 Hidden' }}
+                </button>
+              </td>
+              <td>
+                <button class="btn-edit" (click)="openEditRestaurant(r)">Edit</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Edit Restaurant Modal -->
+      <div class="modal-overlay" *ngIf="editingRestaurant" (click)="cancelEditRestaurant()">
+        <div class="modal-box" (click)="$event.stopPropagation()">
+          <h3>Edit Restaurant</h3>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Business Name</label>
+              <input [(ngModel)]="editingRestaurant.businessName" placeholder="Business name" />
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input [(ngModel)]="editingRestaurant.email" placeholder="Email" />
+            </div>
+            <div class="form-group">
+              <label>Phone</label>
+              <input [(ngModel)]="editingRestaurant.phone" placeholder="Phone" />
+            </div>
+            <div class="form-group">
+              <label>City</label>
+              <input [(ngModel)]="editingRestaurant.city" placeholder="City" />
+            </div>
+            <div class="form-group">
+              <label>Type</label>
+              <input [(ngModel)]="editingRestaurant.type" placeholder="e.g. coffee, restaurant" />
+            </div>
+            <div class="form-group">
+              <label>License Status</label>
+              <select [(ngModel)]="editingRestaurant.licenseStatus">
+                <option value="trial">Trial</option>
+                <option value="active">Active</option>
+                <option value="expired">Expired</option>
+                <option value="suspended">Suspended</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="toggle-row">
+            <label class="switch-label">
+              <span>Active <small>(visible to customers)</small></span>
+              <label class="switch">
+                <input type="checkbox" [(ngModel)]="editingRestaurant.active" />
+                <span class="slider"></span>
+              </label>
+            </label>
+          </div>
+
+          <div class="modal-actions">
+            <button class="btn-cancel" (click)="cancelEditRestaurant()">Cancel</button>
+            <button class="btn-save" (click)="saveRestaurant()" [disabled]="saving">
+              {{ saving ? 'Saving…' : 'Save Changes' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>

@@ -3,7 +3,7 @@ import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from '@angular/fire/auth';
-import { Firestore, doc, setDoc, updateDoc, collection } from '@angular/fire/firestore';
+import { Firestore, doc, setDoc, updateDoc, getDoc, collection } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-register',
@@ -67,6 +67,7 @@ export class RegisterComponent {
         createdAt: new Date(),
         lastLogin: new Date(),
         isVerified: false,
+        isAdmin: false,
         status: "active",
         currentRestaurantId: "",
         role: "owner",
@@ -142,7 +143,7 @@ export class RegisterComponent {
         throw new Error("Login failed");
       }
 
-      // Update lastLogin
+      // Update lastLogin and read user role
       const userDocRef = doc(this.firestore, `users/${uid}`);
       try {
         await updateDoc(userDocRef, {
@@ -152,8 +153,14 @@ export class RegisterComponent {
         console.warn('Failed to update lastLogin:', err);
       }
 
-      // Redirect to admin panel
-      await this.router.navigate(['/admin-panel', uid]);
+      // Redirect based on isAdmin flag
+      const userSnap = await getDoc(userDocRef);
+      const userData = userSnap.data() as { isAdmin?: boolean } | undefined;
+      if (userData?.isAdmin === true) {
+        await this.router.navigate(['/admin']);
+      } else {
+        await this.router.navigate(['/admin-panel', uid]);
+      }
 
     } catch (error: any) {
       console.error(error);
