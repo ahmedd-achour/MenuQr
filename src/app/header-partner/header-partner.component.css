@@ -1,0 +1,214 @@
+.partner-header{
+
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    z-index:9999;
+
+    background:#000000;
+
+    box-shadow:0 5px 18px rgba(0,0,0,.08);
+
+}
+
+.navbar-wrapper{
+
+    height:72px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+}
+
+.logo img{
+
+    height:52px;
+
+}
+
+.desktop-nav{
+
+    display:flex;
+
+    gap:35px;
+
+    align-items:center;
+
+}
+
+.desktop-nav a{
+
+    color:#ffffff;
+
+    font-weight:600;
+
+    text-decoration:none;
+
+    transition:.25s;
+
+    position:relative;
+
+}
+
+.desktop-nav a:hover{
+
+    color:#b68834;
+
+}
+
+.desktop-nav a.active{
+
+    color:#b68834;
+
+}
+
+.desktop-nav a.active::after{
+
+    content:"";
+
+    position:absolute;
+
+    bottom:-8px;
+
+    left:0;
+
+    width:100%;
+
+    height:3px;
+
+    border-radius:5px;
+
+    background:#b68834;
+
+}
+
+.desktop-actions{
+
+    display:flex;
+
+    align-items:center;
+
+}
+
+.logout-btn{
+
+    padding:10px 24px;
+
+    border-radius:30px;
+
+    background:#b68834;
+
+    color:white;
+
+    text-decoration:none;
+
+    font-weight:600;
+
+    transition:.25s;
+
+}
+
+.logout-btn:hover{
+
+    transform:translateY(-2px);
+
+    color:white;
+
+}
+
+.mobile-toggle{
+
+    display:none;
+
+    background:none;
+
+    border:none;
+
+    font-size:30px;
+
+}
+
+.mobile-overlay{
+
+    position:fixed;
+
+    inset:0;
+
+    background:rgba(0,0,0,.45);
+
+}
+
+.mobile-nav{
+
+    position:fixed;
+
+    top:72px;
+
+    left:0;
+
+    width:100%;
+
+    background:white;
+
+    overflow:hidden;
+
+    max-height:0;
+
+    transition:.35s;
+
+    box-shadow:0 12px 20px rgba(0,0,0,.12);
+
+}
+
+.mobile-nav.open{
+
+    max-height:450px;
+
+}
+
+.mobile-nav a{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    padding:18px 24px;
+
+    color:#444;
+
+    text-decoration:none;
+
+    font-weight:600;
+
+    border-bottom:1px solid #ececec;
+
+}
+
+.mobile-nav a:hover{
+
+    background:#fafafa;
+
+}
+
+@media(max-width:991px){
+
+.desktop-nav,
+.desktop-actions{
+
+display:none;
+
+}
+
+.mobile-toggle{
+
+display:block;
+
+}
+
+}

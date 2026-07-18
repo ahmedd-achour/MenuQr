@@ -1,55 +1,103 @@
-	<!-- Header desktop -->
-	<div class=" gradient1 trans-0-4">
-		<div class="container h-full">
-			<div class="wrap_header trans-0-3">
-				<!-- Logo -->
-				<div class="logo">
-					<a [routerLink]="['/admin-panel', userId]">
-						<img src="../../assets/logo.png" alt="IMG-LOGO" data-logofixed="../../assets/logo.png">
-					</a>
-				</div>
+<header class="partner-header">
 
-				<!-- Menu -->
-				<div class="wrap_menu p-l-45 p-l-0-xl">
-					<nav class="menu">
-						<ul class="main_menu">
-							<li>
-								<a [routerLink]="['/admin-panel', userId]">Dashboard</a>
-							</li>
+  <div class="container">
 
-							<li>
-								<a [routerLink]="['/admin-panel', userId, 'menu']">My-Menu</a>
-							</li>
+    <div class="navbar-wrapper">
 
-          <!--
+      <!-- Logo -->
+      <a class="logo" [routerLink]="['/admin-panel', userId]">
+        <img src="../../assets/logo.png" alt="Logo">
+      </a>
 
-          	<li>
-								<a href="/reservation">Reservation</a>
-							</li>
+      <!-- Desktop Navigation -->
+      <nav class="desktop-nav">
 
+        <a
+          [routerLink]="['/admin-panel', userId]"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{exact:true}">
+          Dashboard
+        </a>
 
-          -->
+        <a
+          [routerLink]="['/admin-panel', userId, 'menu']"
+          routerLinkActive="active">
+          My Menu
+        </a>
 
+        <a
+          [routerLink]="['/admin-panel', userId, 'qr-code']"
+          routerLinkActive="active">
+          QR Design
+        </a>
 
-							<li>
-								<a [routerLink]="['/admin-panel', userId, 'qr-code']">QR-Design</a>
-							</li>
+      </nav>
 
-							<li>
-								<a [routerLink]="['/register']">Logout</a>
-							</li>
-						</ul>
-					</nav>
-				</div>
+      <div class="desktop-actions">
 
-				<!-- Social -->
-				<div class="social flex-w flex-l-m p-r-20">
-					<a href="#"><i class="fa fa-tripadvisor" aria-hidden="true"></i></a>
-					<a href="#"><i class="fa fa-facebook m-l-21" aria-hidden="true"></i></a>
-					<a href="#"><i class="fa fa-twitter m-l-21" aria-hidden="true"></i></a>
+        <a class="logout-btn"
+           routerLink="/register">
+          Logout
+        </a>
 
-					<button class="btn-show-sidebar m-l-33 trans-0-4">.</button>
-				</div>
-			</div>
-		</div>
-	</div>
+      </div>
+
+      <!-- Mobile Hamburger -->
+      <button
+        class="mobile-toggle"
+        (click)="menuOpen=!menuOpen">
+
+        <i
+          class="fa"
+          [ngClass]="menuOpen ? 'fa-times' : 'fa-bars'">
+        </i>.
+
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- Mobile Overlay -->
+  <div
+    class="mobile-overlay"
+    *ngIf="menuOpen"
+    (click)="menuOpen=false">
+  </div>
+
+  <!-- Mobile Menu -->
+  <nav
+    class="mobile-nav"
+    [class.open]="menuOpen">
+
+    <a
+      [routerLink]="['/admin-panel', userId]"
+      (click)="menuOpen=false">
+      <i class="fa fa-home"></i>
+      Dashboard
+    </a>
+
+    <a
+      [routerLink]="['/admin-panel', userId,'menu']"
+      (click)="menuOpen=false">
+      <i class="fa fa-cutlery"></i>
+      My Menu
+    </a>
+
+    <a
+      [routerLink]="['/admin-panel', userId,'qr-code']"
+      (click)="menuOpen=false">
+      <i class="fa fa-qrcode"></i>
+      QR Design
+    </a>
+
+    <a
+      routerLink="/register"
+      (click)="menuOpen=false">
+      <i class="fa fa-sign-out"></i>
+      Logout
+    </a>
+
+  </nav>
+
+</header>

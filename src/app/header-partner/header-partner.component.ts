@@ -1,13 +1,19 @@
+import { CommonModule, NgClass } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { RouterLink, RouterLinkActive, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-header-partner',
   standalone: true,
-  imports: [RouterModule],
-  templateUrl: './header-partner.component.html',
+imports: [
+  CommonModule,
+  RouterLink,
+  RouterLinkActive,
+  NgClass
+],  templateUrl: './header-partner.component.html',
   styleUrl: './header-partner.component.css'
 })
 export class HeaderPartnerComponent {
   @Input() userId: string = '';
+  menuOpen = false;
 }
