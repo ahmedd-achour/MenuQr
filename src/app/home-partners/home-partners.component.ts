@@ -82,6 +82,26 @@ export class HomePartnersComponent implements OnInit {
   notificationMessage = '';
   isError = false;
 
+  // Category selection and product pagination states
+  categories: any[] = [];
+  selectedCategoryId: string = 'all';
+  productLimit = 8;
+  hasMoreProducts = false;
+
+  get activeCategories(): any[] {
+    return this.categories.filter(cat => 
+      this.addedProducts.some(p => p.categoryId === cat.id && p.visible)
+    );
+  }
+
+  get filteredPreviewProducts(): any[] {
+    const visibleProds = this.addedProducts.filter(p => p.visible);
+    if (this.selectedCategoryId === 'all') {
+      return visibleProds;
+    }
+    return visibleProds.filter(p => p.categoryId === this.selectedCategoryId);
+  }
+
   constructor(
     private route: ActivatedRoute,
     private firestore: Firestore,
@@ -156,28 +176,77 @@ export class HomePartnersComponent implements OnInit {
     });
   }
 
+  private async fetchCategories(): Promise<void> {
+    try {
+      const categoriesRef = collection(this.firestore, 'master_categories');
+      const categoriesQuery = query(categoriesRef, where('active', '==', true));
+      const snap = await getDocs(categoriesQuery);
+      this.categories = snap.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          name: data['name'],
+          icon: data['icon'] || '',
+          order: data['order'] !== undefined ? data['order'] : 99
+        };
+      }).sort((a, b) => a.order - b.order);
+    } catch (e) {
+      console.warn('[HomePartners] Failed to fetch categories:', e);
+    }
+  }
+
   private async loadAddedProducts(restaurantId: string): Promise<void> {
     try {
+      await this.fetchCategories();
+
       const prodRef = collection(this.firestore, 'restaurant_products');
       const q = query(prodRef, where('restaurantId', '==', restaurantId));
       const snapshot = await getDocs(q);
 
-      const products = await Promise.all(snapshot.docs.map(async (d) => {
+      const totalCount = snapshot.docs.length;
+      this.hasMoreProducts = totalCount > this.productLimit;
+
+      const docsToFetch = snapshot.docs.slice(0, this.productLimit);
+
+      // Fetch master products details to map categoryId
+      const masterRef = collection(this.firestore, 'master_products');
+      const masterSnap = await getDocs(masterRef);
+      const mastersMap = new Map(masterSnap.docs.map(d => [d.id, d.data()]));
+
+      const products = docsToFetch.map((d) => {
         const data = d.data();
+        const masterProductId = data['masterProductId'] || '';
+        const master = mastersMap.get(masterProductId) || {};
         return {
           id: d.id,
-          name: data['nameSnapshot'] || 'Produit',
-          image: data['imageOverride'] || '',
-          description: data['descriptionOverride'] || '',
-          price: data['priceVariant'] || 0,
-          visible: data['visible'] !== false
+          name: data['nameSnapshot'] || master['name'] || 'Produit',
+          image: data['imageOverride'] || master['image'] || '',
+          description: data['descriptionOverride'] || master['description'] || '',
+          price: data['priceVariant'] || master['price'] || 0,
+          visible: data['visible'] !== false,
+          categoryId: master['categoryId'] || '',
+          displayOrder: data['displayOrder'] !== undefined ? data['displayOrder'] : 99
         };
-      }));
+      });
 
       this.addedProducts = products;
-      console.log(`[HomePartners] Loaded ${products.length} products`);
+      console.log(`[HomePartners] Loaded ${products.length} products (Limit: ${this.productLimit})`);
     } catch (err) {
       console.error('Products load error:', err);
+    }
+  }
+
+  loadMoreProducts(): void {
+    this.productLimit += 8;
+    if (this.restaurantData.id) {
+      this.loadAddedProducts(this.restaurantData.id);
+    }
+  }
+
+  loadAllProducts(): void {
+    this.productLimit = 99999;
+    if (this.restaurantData.id) {
+      this.loadAddedProducts(this.restaurantData.id);
     }
   }
 

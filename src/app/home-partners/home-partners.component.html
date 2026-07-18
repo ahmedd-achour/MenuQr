@@ -50,7 +50,7 @@
                      'linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.7)), url(assets/teste.jpg)'">
                 <div class="uploader-overlay" title="Changer l'image de couverture">
                   <i class="fa fa-camera"></i>
-                  <input title="gh" type="file" (change)="uploadMedia($event, 'coverImage')" accept="image/*">
+                  <input title="Image de couverture" type="file" (change)="uploadMedia($event, 'coverImage')" accept="image/*">
                 </div>
 
                 <!-- Floating content matching the public QR Code design -->
@@ -59,7 +59,7 @@
                     <div class="phone-logo" [style.backgroundImage]="'url(' + restaurantData.logo + ')'">
                       <div class="uploader-overlay-circle" title="Changer le logo">
                         <i class="fa fa-pencil"></i>
-                        <input title="gh" type="file" (change)="uploadMedia($event, 'logo')" accept="image/*">
+                        <input title="Logo" type="file" (change)="uploadMedia($event, 'logo')" accept="image/*">
                       </div>
                     </div>
                   </div>
@@ -67,7 +67,7 @@
                   <div class="phone-logo-container mb-2" *ngIf="!restaurantData.logo">
                     <div class="phone-logo-placeholder mx-auto">
                       <i class="fa fa-plus text-white"></i>
-                      <input title="gh" type="file" (change)="uploadMedia($event, 'logo')" accept="image/*">
+                      <input title="Logo" type="file" (change)="uploadMedia($event, 'logo')" accept="image/*">
                     </div>
                   </div>
 
@@ -189,7 +189,7 @@
                 <label class="form-label-premium">Téléphone de contact</label>
                 <div class="input-icon-group">
                   <i class="fa fa-phone input-icon"></i>
-                  <input type="tel" class="form-control-premium" [(ngModel)]="userProfile.phone" placeholder="+216 XX XXX XXX">
+                  <input type="tel" class="form-control-premium" [(ngModel)]="userProfile.phone" placeholder="+216 XX XXX XXX" title="Téléphone de contact">
                 </div>
               </div>
             </div>
@@ -206,26 +206,26 @@
                 <label class="form-label-premium">Nom Commercial</label>
                 <div class="input-icon-group">
                   <i class="fa fa-building-o input-icon"></i>
-                  <input type="text" class="form-control-premium" [(ngModel)]="restaurantData.businessName" placeholder="Ex. Café Central">
+                  <input type="text" class="form-control-premium" [(ngModel)]="restaurantData.businessName" placeholder="Ex. Café Central" title="Nom Commercial">
                 </div>
               </div>
               <div class="col-md-6">
                 <label class="form-label-premium">Ville</label>
                 <div class="input-icon-group">
                   <i class="fa fa-map input-icon"></i>
-                  <input type="text" class="form-control-premium" [(ngModel)]="restaurantData.city" placeholder="Ex. Tunis">
+                  <input type="text" class="form-control-premium" [(ngModel)]="restaurantData.city" placeholder="Ex. Tunis" title="Ville">
                 </div>
               </div>
               <div class="col-md-6">
                 <label class="form-label-premium">Adresse Complète</label>
                 <div class="input-icon-group">
                   <i class="fa fa-map-marker input-icon"></i>
-                  <input type="text" class="form-control-premium" [(ngModel)]="restaurantData.address" placeholder="Ex. Avenue Habib Bourguiba">
+                  <input type="text" class="form-control-premium" [(ngModel)]="restaurantData.address" placeholder="Ex. Avenue Habib Bourguiba" title="Adresse Complète">
                 </div>
               </div>
               <div class="col-12">
                 <label class="form-label-premium">Description & Slogan</label>
-                <textarea class="form-control-premium textarea-premium" rows="3" [(ngModel)]="restaurantData.description" placeholder="Présentez votre restaurant, vos spécialités et vos horaires de service..."></textarea>
+                <textarea class="form-control-premium textarea-premium" rows="3" [(ngModel)]="restaurantData.description" placeholder="Présentez votre restaurant, vos spécialités et vos horaires de service..." title="Description et Slogan"></textarea>
               </div>
             </div>
           </div>
@@ -244,7 +244,7 @@
                   <span class="color-hex-label">{{ themeData.primaryColor }}</span>
                 </label>
                 <div class="color-picker-wrapper">
-                  <input type="color" [(ngModel)]="themeData.primaryColor" class="color-picker-input">
+                  <input type="color" [(ngModel)]="themeData.primaryColor" class="color-picker-input" title="Couleur Primaire">
                   <div class="color-picker-mask" [style.backgroundColor]="themeData.primaryColor"></div>
                 </div>
               </div>
@@ -254,7 +254,7 @@
                   <span class="color-hex-label">{{ themeData.secondaryColor }}</span>
                 </label>
                 <div class="color-picker-wrapper">
-                  <input type="color" [(ngModel)]="themeData.secondaryColor" class="color-picker-input">
+                  <input type="color" [(ngModel)]="themeData.secondaryColor" class="color-picker-input" title="Couleur Secondaire">
                   <div class="color-picker-mask" [style.backgroundColor]="themeData.secondaryColor"></div>
                 </div>
               </div>
@@ -266,7 +266,7 @@
                   <span class="color-hex-label">{{ themeData.background }}</span>
                 </label>
                 <div class="color-picker-wrapper">
-                  <input type="color" [(ngModel)]="themeData.background" class="color-picker-input">
+                  <input type="color" [(ngModel)]="themeData.background" class="color-picker-input" title="Arrière-plan Menu">
                   <div class="color-picker-mask" [style.backgroundColor]="themeData.background"></div>
                 </div>
               </div>
@@ -276,7 +276,7 @@
                   <span class="color-hex-label">{{ themeData.cardColor }}</span>
                 </label>
                 <div class="color-picker-wrapper">
-                  <input type="color" [(ngModel)]="themeData.cardColor" class="color-picker-input">
+                  <input type="color" [(ngModel)]="themeData.cardColor" class="color-picker-input" title="Arrière-plan Cartes">
                   <div class="color-picker-mask" [style.backgroundColor]="themeData.cardColor"></div>
                 </div>
               </div>
@@ -286,7 +286,7 @@
                 <label class="form-label-premium">Police d'écriture</label>
                 <div class="input-icon-group select-container">
                   <i class="fa fa-font input-icon"></i>
-                  <select [(ngModel)]="themeData.font" class="form-control-premium select-premium">
+                  <select [(ngModel)]="themeData.font" class="form-control-premium select-premium" title="Police d'écriture">
                     <option value="Poppins">Poppins (Moderne)</option>
                     <option value="Outfit">Outfit (Elégant)</option>
                     <option value="Playfair Display">Playfair Display (Classique)</option>
@@ -300,7 +300,7 @@
                 <label class="form-label-premium">Bordure Arrondie (px)</label>
                 <div class="input-icon-group">
                   <i class="fa fa-dot-circle-o input-icon"></i>
-                  <input type="number" class="form-control-premium" [(ngModel)]="themeData.radius" min="0" max="30" placeholder="10">
+                  <input type="number" class="form-control-premium" [(ngModel)]="themeData.radius" min="0" max="30" placeholder="10" title="Bordure Arrondie (px)">
                 </div>
               </div>
 
@@ -311,7 +311,7 @@
                     <span class="text-muted text-xs">Activez un affichage sombre élégant pour les clients de nuit</span>
                   </div>
                   <label class="premium-switch">
-                    <input type="checkbox" [(ngModel)]="themeData.darkMode">
+                    <input type="checkbox" [(ngModel)]="themeData.darkMode" title="Mode Sombre">
                     <span class="switch-slider"></span>
                   </label>
                 </div>
