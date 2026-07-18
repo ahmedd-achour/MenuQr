@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { Firestore, doc, docData, updateDoc, setDoc, collection, getDocs, getDoc, query, where } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytes, getDownloadURL } from '@angular/fire/storage';
 import { CommonModule } from '@angular/common';
@@ -11,15 +11,13 @@ interface UserProfile {
   email?: string;
   fullName?: string;
   currentRestaurantId?: string;
-  phone : string;
+  phone?: string;
   status?: string;
 }
 
 interface Restaurant {
   id: string;
-  ownerId?: string;
   businessName?: string;
-  slug?: string;
   logo?: string;
   coverImage?: string;
   address?: string;
@@ -44,62 +42,44 @@ interface Theme {
 @Component({
   selector: 'app-home-partners',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderPartnerComponent, RouterLink],
+  imports: [CommonModule, FormsModule, HeaderPartnerComponent],
   templateUrl: './home-partners.component.html',
   styleUrl: './home-partners.component.css'
 })
 export class HomePartnersComponent implements OnInit {
 
   userId: string = '';
-  userProfile?: UserProfile ;
+  userProfile?: UserProfile;
 
-  restaurantData: Restaurant = {
-    id: '',
-    businessName: '',
-    logo: '',
-    coverImage: '',
-    address: '',
-    city: '',
-    description: '',
-    currency: 'TND',
-    language: 'fr',
-    status: 'trial'
-  };
+  // Display data (from Firestore)
+  restaurantData: Restaurant = {} as Restaurant;
+  themeData: Theme = {} as Theme;
 
-  themeData: Theme = {
-    restaurantId: '',
-    primaryColor: '#d97706',
-    secondaryColor: '#78350f',
-    background: '#ffffff',
-    cardColor: '#f8fafc',
-    font: 'Outfit',
-    radius: 8,
-    darkMode: false
-  };
+  // Editable form data (prevents reset)
+  editRestaurant: any = {};
+  editTheme: any = {};
 
   addedProducts: any[] = [];
   isSaving = false;
   notificationMessage = '';
   isError = false;
 
-  // Category selection and product pagination states
   categories: any[] = [];
   selectedCategoryId: string = 'all';
   productLimit = 8;
   hasMoreProducts = false;
 
   get activeCategories(): any[] {
-    return this.categories.filter(cat => 
+    return this.categories.filter(cat =>
       this.addedProducts.some(p => p.categoryId === cat.id && p.visible)
     );
   }
 
   get filteredPreviewProducts(): any[] {
     const visibleProds = this.addedProducts.filter(p => p.visible);
-    if (this.selectedCategoryId === 'all') {
-      return visibleProds;
-    }
-    return visibleProds.filter(p => p.categoryId === this.selectedCategoryId);
+    return this.selectedCategoryId === 'all'
+      ? visibleProds
+      : visibleProds.filter(p => p.categoryId === this.selectedCategoryId);
   }
 
   constructor(
@@ -110,8 +90,6 @@ export class HomePartnersComponent implements OnInit {
 
   ngOnInit(): void {
     this.userId = this.route.snapshot.paramMap.get('id') || '';
-    console.log('[HomePartners] User ID from route:', this.userId);
-
     if (this.userId) {
       this.loadAllData();
     } else {
@@ -120,103 +98,82 @@ export class HomePartnersComponent implements OnInit {
   }
 
   private loadAllData(): void {
-    // Load User
     const userRef = doc(this.firestore, `users/${this.userId}`);
     docData(userRef, { idField: 'id' }).subscribe({
       next: (user: any) => {
-        console.log('[HomePartners] User data loaded:', user);
         if (user) {
-          this.userProfile = user as UserProfile;
-
+          this.userProfile = user;
           if (user.currentRestaurantId) {
             this.loadRestaurant(user.currentRestaurantId);
-          } else {
-            this.triggerAlert('Aucun restaurant lié à ce compte.', true);
           }
         }
       },
-      error: (err) => {
-        console.error('[HomePartners] User load error:', err);
-        this.triggerAlert('Impossible de charger les données utilisateur.', true);
-      }
+      error: (err) => this.triggerAlert('Impossible de charger les données utilisateur.', true)
     });
   }
 
   private loadRestaurant(restaurantId: string): void {
-    console.log('[HomePartners] Loading restaurant:', restaurantId);
     const restRef = doc(this.firestore, `restaurants/${restaurantId}`);
     docData(restRef, { idField: 'id' }).subscribe({
       next: (data: any) => {
-        console.log('[HomePartners] Restaurant data:', data);
         if (data) {
-          this.restaurantData = { ...data, id: restaurantId } as Restaurant;
+          this.restaurantData = { ...data, id: restaurantId };
+          this.editRestaurant = { ...this.restaurantData }; // Copy for editing
           this.loadTheme(restaurantId);
           this.loadAddedProducts(restaurantId);
-        } else {
-          this.triggerAlert('Restaurant non trouvé.', true);
         }
       },
-      error: (err) => {
-        console.error('[HomePartners] Restaurant load error:', err);
-        this.triggerAlert('Erreur lors du chargement du restaurant.', true);
-      }
+      error: () => this.triggerAlert('Erreur lors du chargement du restaurant.', true)
     });
   }
 
   private loadTheme(restaurantId: string): void {
     const themeRef = doc(this.firestore, `themes/theme_${restaurantId}`);
-    docData(themeRef).subscribe({
-      next: (data: any) => {
-        if (data) {
-          this.themeData = { ...data, restaurantId } as Theme;
-          console.log('[HomePartners] Theme loaded:', this.themeData);
-        }
-      },
-      error: (err) => console.warn('Theme load warning:', err)
+
+    getDoc(themeRef).then(snapshot => {
+      const data = snapshot.data();
+      if (data) {
+        this.themeData = { ...data, restaurantId } as Theme;
+      } else {
+        this.themeData = this.getDefaultTheme(restaurantId);
+      }
+      this.editTheme = { ...this.themeData }; // Copy for editing
+    }).catch(() => {
+      this.themeData = this.getDefaultTheme(restaurantId);
+      this.editTheme = { ...this.themeData };
     });
   }
 
-  private async fetchCategories(): Promise<void> {
-    try {
-      const categoriesRef = collection(this.firestore, 'master_categories');
-      const categoriesQuery = query(categoriesRef, where('active', '==', true));
-      const snap = await getDocs(categoriesQuery);
-      this.categories = snap.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          name: data['name'],
-          icon: data['icon'] || '',
-          order: data['order'] !== undefined ? data['order'] : 99
-        };
-      }).sort((a, b) => a.order - b.order);
-    } catch (e) {
-      console.warn('[HomePartners] Failed to fetch categories:', e);
-    }
+  private getDefaultTheme(restaurantId: string): Theme {
+    return {
+      restaurantId,
+      primaryColor: '#d97706',
+      secondaryColor: '#78350f',
+      background: '#ffffff',
+      cardColor: '#f8fafc',
+      font: 'Outfit',
+      radius: 8,
+      darkMode: false
+    };
   }
 
   private async loadAddedProducts(restaurantId: string): Promise<void> {
+    // ... (kept same as before - no change needed)
     try {
       await this.fetchCategories();
-
       const prodRef = collection(this.firestore, 'restaurant_products');
       const q = query(prodRef, where('restaurantId', '==', restaurantId));
       const snapshot = await getDocs(q);
 
-      const totalCount = snapshot.docs.length;
-      this.hasMoreProducts = totalCount > this.productLimit;
-
+      this.hasMoreProducts = snapshot.docs.length > this.productLimit;
       const docsToFetch = snapshot.docs.slice(0, this.productLimit);
 
-      // Fetch master products details to map categoryId
-      const masterRef = collection(this.firestore, 'master_products');
-      const masterSnap = await getDocs(masterRef);
+      const masterSnap = await getDocs(collection(this.firestore, 'master_products'));
       const mastersMap = new Map(masterSnap.docs.map(d => [d.id, d.data()]));
 
-      const products = docsToFetch.map((d) => {
+      this.addedProducts = docsToFetch.map(d => {
         const data = d.data();
-        const masterProductId = data['masterProductId'] || '';
-        const master = mastersMap.get(masterProductId) || {};
+        const master = mastersMap.get(data['masterProductId']) || {};
         return {
           id: d.id,
           name: data['nameSnapshot'] || master['name'] || 'Produit',
@@ -228,64 +185,62 @@ export class HomePartnersComponent implements OnInit {
           displayOrder: data['displayOrder'] !== undefined ? data['displayOrder'] : 99
         };
       });
-
-      this.addedProducts = products;
-      console.log(`[HomePartners] Loaded ${products.length} products (Limit: ${this.productLimit})`);
     } catch (err) {
       console.error('Products load error:', err);
     }
   }
 
-  loadMoreProducts(): void {
-    this.productLimit += 8;
-    if (this.restaurantData.id) {
-      this.loadAddedProducts(this.restaurantData.id);
+  private async fetchCategories(): Promise<void> {
+    try {
+      const snap = await getDocs(query(collection(this.firestore, 'master_categories'), where('active', '==', true)));
+      this.categories = snap.docs.map(doc => ({
+        id: doc.id,
+        name: doc.data()['name'],
+        order: doc.data()['order'] || 99
+      })).sort((a, b) => a.order - b.order);
+    } catch (e) {
+      console.warn('Categories fetch failed:', e);
     }
   }
 
-  loadAllProducts(): void {
-    this.productLimit = 99999;
-    if (this.restaurantData.id) {
-      this.loadAddedProducts(this.restaurantData.id);
-    }
-  }
-
+  // ==================== SAVE ====================
   onSave(): void {
-    if (!this.restaurantData.id) {
-      this.triggerAlert('Aucun restaurant à sauvegarder.', true);
-      return;
-    }
+    if (!this.restaurantData.id) return;
 
     this.isSaving = true;
 
     const restaurantPayload = {
-      businessName: this.restaurantData.businessName,
-      address: this.restaurantData.address,
-      city: this.restaurantData.city,
-      description: this.restaurantData.description,
-      currency: this.restaurantData.currency,
-      language: this.restaurantData.language,
+      businessName: this.editRestaurant.businessName,
+      address: this.editRestaurant.address,
+      city: this.editRestaurant.city,
+      description: this.editRestaurant.description,
+      currency: this.editRestaurant.currency || 'TND',
+      language: this.editRestaurant.language || 'fr',
       updatedAt: new Date()
     };
 
     const restaurantRef = doc(this.firestore, `restaurants/${this.restaurantData.id}`);
+    const themeRef = doc(this.firestore, `themes/theme_${this.restaurantData.id}`);
 
-    updateDoc(restaurantRef, restaurantPayload)
-      .then(() => {
-        const themeRef = doc(this.firestore, `themes/theme_${this.restaurantData.id}`);
-        return setDoc(themeRef, this.themeData, { merge: true });
-      })
-      .then(() => {
-        this.isSaving = false;
-        this.triggerAlert('✅ Modifications sauvegardées avec succès !', false);
-      })
-      .catch(err => {
-        this.isSaving = false;
-        console.error(err);
-        this.triggerAlert('❌ Erreur de sauvegarde : ' + err.message, true);
-      });
+    Promise.all([
+      updateDoc(restaurantRef, restaurantPayload),
+      setDoc(themeRef, this.editTheme, { merge: true })
+    ])
+    .then(() => {
+      // Sync back to display data
+      this.restaurantData = { ...this.restaurantData, ...this.editRestaurant };
+      this.themeData = { ...this.editTheme };
+
+      this.triggerAlert('✅ Modifications sauvegardées avec succès !', false);
+    })
+    .catch(err => {
+      console.error(err);
+      this.triggerAlert('❌ Erreur de sauvegarde.', true);
+    })
+    .finally(() => this.isSaving = false);
   }
 
+  // Media Upload
   uploadMedia(event: any, field: 'logo' | 'coverImage'): void {
     const file = event.target?.files?.[0];
     if (!file || !this.restaurantData.id) return;
@@ -297,17 +252,17 @@ export class HomePartnersComponent implements OnInit {
     uploadBytes(storageRef, file)
       .then(snapshot => getDownloadURL(snapshot.ref))
       .then(url => {
-        if (field === 'logo') this.restaurantData.logo = url;
-        else this.restaurantData.coverImage = url;
-
-        this.isSaving = false;
-        this.triggerAlert(`${field === 'logo' ? 'Logo' : 'Couverture'} téléchargé avec succès.`, false);
+        if (field === 'logo') {
+          this.restaurantData.logo = url;
+          this.editRestaurant.logo = url;
+        } else {
+          this.restaurantData.coverImage = url;
+          this.editRestaurant.coverImage = url;
+        }
+        this.triggerAlert(`${field === 'logo' ? 'Logo' : 'Couverture'} mis à jour.`, false);
       })
-      .catch(err => {
-        this.isSaving = false;
-        this.triggerAlert('Échec du téléversement.', true);
-        console.error(err);
-      });
+      .catch(() => this.triggerAlert('Échec du téléversement.', true))
+      .finally(() => this.isSaving = false);
   }
 
   downloadQRCode(): void {
@@ -315,13 +270,24 @@ export class HomePartnersComponent implements OnInit {
     const url = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=http://localhost:4200/qr-code/${this.userId}`;
     const a = document.createElement('a');
     a.href = url;
-    a.download = `qr-menu-${this.restaurantData.businessName || 'my-restaurant'}.png`;
+    a.download = `qr-menu-${this.restaurantData.businessName || 'restaurant'}.png`;
     a.click();
   }
 
   private triggerAlert(message: string, isError: boolean): void {
     this.notificationMessage = message;
     this.isError = isError;
-    setTimeout(() => this.notificationMessage = '', 6000);
+    setTimeout(() => this.notificationMessage = '', 5000);
+  }
+
+  // Load more products
+  loadMoreProducts(): void {
+    this.productLimit += 8;
+    if (this.restaurantData.id) this.loadAddedProducts(this.restaurantData.id);
+  }
+
+  loadAllProducts(): void {
+    this.productLimit = 99999;
+    if (this.restaurantData.id) this.loadAddedProducts(this.restaurantData.id);
   }
 }

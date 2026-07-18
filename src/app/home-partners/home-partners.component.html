@@ -35,13 +35,13 @@
           </div>
 
           <div class="mock-phone-container mx-auto">
-            <div class="phone-screen" [class.dark-theme]="themeData.darkMode"
-                 [style.--primary-color]="themeData.primaryColor || '#222222'"
-                 [style.--secondary-color]="themeData.secondaryColor || '#b68834'"
-                 [style.--background-color]="themeData.background || '#f9f9ff'"
-                 [style.--card-color]="themeData.cardColor || '#ffffff'"
-                 [style.--border-radius.px]="themeData.radius !== undefined ? themeData.radius : 10"
-                 [style.--font-family]="themeData.font || 'Outfit'">
+            <div class="phone-screen" [class.dark-theme]="editTheme.darkMode"
+                 [style.--primary-color]="editTheme.primaryColor || '#222222'"
+                 [style.--secondary-color]="editTheme.secondaryColor || '#b68834'"
+                 [style.--background-color]="editTheme.background || '#f9f9ff'"
+                 [style.--card-color]="editTheme.cardColor || '#ffffff'"
+                 [style.--border-radius.px]="editTheme.radius !== undefined ? editTheme.radius : 10"
+                 [style.--font-family]="editTheme.font || 'Outfit'">
 
               <!-- Banner/Hero Section -->
               <div class="phone-banner"
@@ -53,7 +53,6 @@
                   <input title="Image de couverture" type="file" (change)="uploadMedia($event, 'coverImage')" accept="image/*">
                 </div>
 
-                <!-- Floating content matching the public QR Code design -->
                 <div class="phone-banner-content text-center px-2">
                   <div class="phone-logo-container mb-2" *ngIf="restaurantData.logo">
                     <div class="phone-logo" [style.backgroundImage]="'url(' + restaurantData.logo + ')'">
@@ -63,7 +62,6 @@
                       </div>
                     </div>
                   </div>
-                  <!-- Case when logo is not set, still provide pencil uploader -->
                   <div class="phone-logo-container mb-2" *ngIf="!restaurantData.logo">
                     <div class="phone-logo-placeholder mx-auto">
                       <i class="fa fa-plus text-white"></i>
@@ -80,7 +78,7 @@
               </div>
 
               <!-- Main Menu Area inside Mock Phone -->
-              <div class="phone-menu-area py-3" [style.backgroundColor]="themeData.background || '#f9f9ff'">
+              <div class="phone-menu-area py-3" [style.backgroundColor]="editTheme.background || '#f9f9ff'">
                 <div class="text-center px-2 mb-3">
                   <h2 style="font-size: 11px; font-weight: 700; color: var(--primary-color, #222222); margin-bottom: 2px;">
                     it's all for you , You order - We serve
@@ -122,7 +120,7 @@
                         {{ product?.price }}<span style="font-size: 0.6rem; font-weight: 500;"> DT</span>
                       </span>
                     </div>
-                    <p class="phone-product-desc mt-1 mb-0">
+                    <p class="phone-product-desc mt-1 mb-0" style="color: #ffffff;">
                       {{ product?.description || 'No description available.' }}
                     </p>
                   </div>
@@ -182,14 +180,14 @@
                 <label class="form-label-premium">Email du propriétaire</label>
                 <div class="input-icon-group">
                   <i class="fa fa-envelope input-icon"></i>
-                  <input type="email" class="form-control-premium" [value]="userProfile.email" readonly title="Email non modifiable">
+                  <input title="hg" type="email" class="form-control-premium" [value]="userProfile.email" readonly>
                 </div>
               </div>
               <div class="col-md-6">
                 <label class="form-label-premium">Téléphone de contact</label>
                 <div class="input-icon-group">
                   <i class="fa fa-phone input-icon"></i>
-                  <input type="tel" class="form-control-premium" [(ngModel)]="userProfile.phone" placeholder="+216 XX XXX XXX" title="Téléphone de contact">
+                  <input type="tel" class="form-control-premium" [(ngModel)]="editRestaurant.phone" placeholder="+216 XX XXX XXX">
                 </div>
               </div>
             </div>
@@ -206,26 +204,27 @@
                 <label class="form-label-premium">Nom Commercial</label>
                 <div class="input-icon-group">
                   <i class="fa fa-building-o input-icon"></i>
-                  <input type="text" class="form-control-premium" [(ngModel)]="restaurantData.businessName" placeholder="Ex. Café Central" title="Nom Commercial">
+                  <input type="text" class="form-control-premium" [(ngModel)]="editRestaurant.businessName" placeholder="Ex. Café Central">
                 </div>
               </div>
               <div class="col-md-6">
                 <label class="form-label-premium">Ville</label>
                 <div class="input-icon-group">
                   <i class="fa fa-map input-icon"></i>
-                  <input type="text" class="form-control-premium" [(ngModel)]="restaurantData.city" placeholder="Ex. Tunis" title="Ville">
+                  <input type="text" class="form-control-premium" [(ngModel)]="editRestaurant.city" placeholder="Ex. Tunis">
                 </div>
               </div>
               <div class="col-md-6">
                 <label class="form-label-premium">Adresse Complète</label>
                 <div class="input-icon-group">
                   <i class="fa fa-map-marker input-icon"></i>
-                  <input type="text" class="form-control-premium" [(ngModel)]="restaurantData.address" placeholder="Ex. Avenue Habib Bourguiba" title="Adresse Complète">
+                  <input type="text" class="form-control-premium" [(ngModel)]="editRestaurant.address" placeholder="Ex. Avenue Habib Bourguiba">
                 </div>
               </div>
               <div class="col-12">
                 <label class="form-label-premium">Description & Slogan</label>
-                <textarea class="form-control-premium textarea-premium" rows="3" [(ngModel)]="restaurantData.description" placeholder="Présentez votre restaurant, vos spécialités et vos horaires de service..." title="Description et Slogan"></textarea>
+                <textarea class="form-control-premium textarea-premium" rows="3" [(ngModel)]="editRestaurant.description"
+                  placeholder="Présentez votre restaurant, vos spécialités et vos horaires de service..."></textarea>
               </div>
             </div>
           </div>
@@ -237,56 +236,55 @@
               <h5>Personnalisation Visuelle (Thème)</h5>
             </div>
             <div class="row g-4">
-              <!-- Colors Row 1 -->
+              <!-- Colors -->
               <div class="col-md-6">
                 <label class="form-label-premium d-flex align-items-center justify-content-between">
                   <span>Couleur Primaire</span>
-                  <span class="color-hex-label">{{ themeData.primaryColor }}</span>
+                  <span class="color-hex-label">{{ editTheme.primaryColor }}</span>
                 </label>
                 <div class="color-picker-wrapper">
-                  <input type="color" [(ngModel)]="themeData.primaryColor" class="color-picker-input" title="Couleur Primaire">
-                  <div class="color-picker-mask" [style.backgroundColor]="themeData.primaryColor"></div>
+                  <input  title="gh" type="color" [(ngModel)]="editTheme.primaryColor" class="color-picker-input">
+                  <div class="color-picker-mask" [style.backgroundColor]="editTheme.primaryColor"></div>
                 </div>
               </div>
               <div class="col-md-6">
                 <label class="form-label-premium d-flex align-items-center justify-content-between">
                   <span>Couleur Secondaire</span>
-                  <span class="color-hex-label">{{ themeData.secondaryColor }}</span>
+                  <span class="color-hex-label">{{ editTheme.secondaryColor }}</span>
                 </label>
                 <div class="color-picker-wrapper">
-                  <input type="color" [(ngModel)]="themeData.secondaryColor" class="color-picker-input" title="Couleur Secondaire">
-                  <div class="color-picker-mask" [style.backgroundColor]="themeData.secondaryColor"></div>
+                  <input  title="gh" type="color" [(ngModel)]="editTheme.secondaryColor" class="color-picker-input">
+                  <div class="color-picker-mask" [style.backgroundColor]="editTheme.secondaryColor"></div>
                 </div>
               </div>
 
-              <!-- Colors Row 2 -->
               <div class="col-md-6">
                 <label class="form-label-premium d-flex align-items-center justify-content-between">
                   <span>Arrière-plan Menu</span>
-                  <span class="color-hex-label">{{ themeData.background }}</span>
+                  <span class="color-hex-label">{{ editTheme.background }}</span>
                 </label>
                 <div class="color-picker-wrapper">
-                  <input type="color" [(ngModel)]="themeData.background" class="color-picker-input" title="Arrière-plan Menu">
-                  <div class="color-picker-mask" [style.backgroundColor]="themeData.background"></div>
+                  <input  title="gh" type="color" [(ngModel)]="editTheme.background" class="color-picker-input">
+                  <div class="color-picker-mask" [style.backgroundColor]="editTheme.background"></div>
                 </div>
               </div>
               <div class="col-md-6">
                 <label class="form-label-premium d-flex align-items-center justify-content-between">
                   <span>Arrière-plan Cartes</span>
-                  <span class="color-hex-label">{{ themeData.cardColor }}</span>
+                  <span class="color-hex-label">{{ editTheme.cardColor }}</span>
                 </label>
                 <div class="color-picker-wrapper">
-                  <input type="color" [(ngModel)]="themeData.cardColor" class="color-picker-input" title="Arrière-plan Cartes">
-                  <div class="color-picker-mask" [style.backgroundColor]="themeData.cardColor"></div>
+                  <input  title="gh" type="color" [(ngModel)]="editTheme.cardColor" class="color-picker-input">
+                  <div class="color-picker-mask" [style.backgroundColor]="editTheme.cardColor"></div>
                 </div>
               </div>
 
-              <!-- Typography & Border Radius -->
+              <!-- Typography -->
               <div class="col-md-6">
                 <label class="form-label-premium">Police d'écriture</label>
-                <div class="input-icon-group select-container">
+                <div class="input-icon-group">
                   <i class="fa fa-font input-icon"></i>
-                  <select [(ngModel)]="themeData.font" class="form-control-premium select-premium" title="Police d'écriture">
+                  <select  title="gh" [(ngModel)]="editTheme.font" class="form-control-premium">
                     <option value="Poppins">Poppins (Moderne)</option>
                     <option value="Outfit">Outfit (Elégant)</option>
                     <option value="Playfair Display">Playfair Display (Classique)</option>
@@ -300,7 +298,7 @@
                 <label class="form-label-premium">Bordure Arrondie (px)</label>
                 <div class="input-icon-group">
                   <i class="fa fa-dot-circle-o input-icon"></i>
-                  <input type="number" class="form-control-premium" [(ngModel)]="themeData.radius" min="0" max="30" placeholder="10" title="Bordure Arrondie (px)">
+                  <input title="gh" type="number" class="form-control-premium" [(ngModel)]="editTheme.radius" min="0" max="30">
                 </div>
               </div>
 
@@ -311,7 +309,7 @@
                     <span class="text-muted text-xs">Activez un affichage sombre élégant pour les clients de nuit</span>
                   </div>
                   <label class="premium-switch">
-                    <input type="checkbox" [(ngModel)]="themeData.darkMode" title="Mode Sombre">
+                    <input  title="gh" type="checkbox" [(ngModel)]="editTheme.darkMode">
                     <span class="switch-slider"></span>
                   </label>
                 </div>
@@ -358,7 +356,7 @@
               <h6 class="product-name font-weight-bold text-dark m-0">{{ p.name }}</h6>
               <p class="product-desc mt-1 text-muted text-xs">{{ p.description || 'Aucune description disponible.' | slice:0:70 }}{{ (p.description?.length || 0) > 70 ? '...' : '' }}</p>
               <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top">
-                <span class="product-price font-weight-bold" [style.color]="themeData.primaryColor">{{ p.price }} <span class="text-xs">DT</span></span>
+                <span class="product-price font-weight-bold" [style.color]="editTheme.primaryColor">{{ p.price }} <span class="text-xs">DT</span></span>
                 <span class="product-category-tag">ID: {{ p.displayOrder }}</span>
               </div>
             </div>
@@ -366,14 +364,12 @@
         </div>
       </div>
 
-      <!-- No products state -->
       <div *ngIf="addedProducts.length === 0" class="text-center py-5 bg-white border bo-rad-10 mt-3 shadow-sm">
         <div class="text-muted text-lg"><i class="fa fa-folder-open-o fa-3x mb-3"></i></div>
         <h5 class="text-dark">Aucun produit trouvé</h5>
         <p class="text-muted text-sm">Allez dans la gestion du menu pour ajouter vos premiers articles.</p>
       </div>
 
-      <!-- Pagination Controls for Read Optimization -->
       <div class="text-center mt-4 pt-2 mb-5" *ngIf="hasMoreProducts">
         <button type="button" class="btn-load-more mr-2" (click)="loadMoreProducts()">
           <i class="fa fa-chevron-down mr-2 animate-bounce"></i>Voir Plus de Produits
