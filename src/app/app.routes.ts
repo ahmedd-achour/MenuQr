@@ -14,6 +14,7 @@ import { Coffee3Component } from './coffee3/coffee3.component';
 import { QrCodeComponent } from './qr-code/qr-code.component';
 import { AdminComponent } from './admin/admin.component';
 import { BlockedComponent } from './blocked/blocked.component';
+import { FreelancerComponent } from './freelancer/freelancer.component';
 
 export const routes: Routes = [
     // ─── Public routes ─────────────────────────────────────────
@@ -54,6 +55,10 @@ export const routes: Routes = [
     {
         path: 'coffee2',
         component: Coffee2Component
+    },
+     {
+        path: 'freelancer',
+        component: FreelancerComponent
     },
     {
         path: 'coffee3',

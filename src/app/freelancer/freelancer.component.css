@@ -1,0 +1,120 @@
+/* Custom utility properties to build upon Bootstrap 5 base definitions */
+
+/* Text tracking updates */
+.tracking-tight { letter-spacing: -0.035em; }
+.tracking-wider { letter-spacing: 0.06em; }
+.tracking-widest { letter-spacing: 0.15em; }
+.fw-black { font-weight: 900 !important; }
+.text-purple { color: #8b5cf6 !important; }
+.border-purple { border-color: #8b5cf6 !important; }
+
+/* Custom colors for text fields inside warning elements */
+.text-warning-dark {
+  color: #92400e !important;
+}
+
+/* Enhanced Card Styling for Admin Dashboard */
+.card {
+  border-radius: 1.25rem !important;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.3s ease;
+  border: 1px solid rgba(0,0,0,0.04);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05),
+              0 2px 4px -2px rgb(0 0 0 / 0.05) !important;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1),
+              0 8px 10px -6px rgb(0 0 0 / 0.1) !important;
+}
+
+/* Top header enhancements */
+.card-header {
+  background: linear-gradient(90deg, #f8fafc, #ffffff) !important;
+}
+
+/* Stats cards */
+.border-start.border-5 {
+  border-width: 6px !important;
+}
+
+/* Referral gradient card */
+.bg-gradient {
+  background: linear-gradient(135deg, #1e2937 0%, #334155 100%) !important;
+}
+
+/* Table enhancements */
+.table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table thead th {
+  background: #f8fafc;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f8fafc;
+  transform: scale(1.005);
+  transition: all 0.2s ease;
+}
+
+/* Search input */
+.input-group .form-control:focus {
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+}
+
+/* Button improvements */
+.btn {
+  border-radius: 0.75rem !important;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.btn-lg {
+  padding: 0.75rem 2rem;
+}
+
+/* Canvas containers */
+.style-canvas-container {
+  max-height: 280px;
+  min-height: 240px;
+}
+
+/* Soft transition effects */
+.transition-all {
+  transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+}
+
+/* Interactive Component Entry Animation */
+.animate-fade-in {
+  animation: componentEntranceFrame 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+@keyframes componentEntranceFrame {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Additional admin polish */
+.bg-light {
+  background-color: #f8fafc !important;
+}
+
+.text-amber-300 {
+  color: #fcd34d;
+}
+
+/* Backdrop for modern glass effect simulation */
+.backdrop-blur {
+}

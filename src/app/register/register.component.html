@@ -11,16 +11,11 @@
             {{ isLogin ? 'Sign In to MenuQr' : 'Start Your Free Trial' }}
           </h3>
         </div>
-
         <form class="wrap-form-booking" (ngSubmit)="isLogin ? login() : signup()">
           <!-- Error Message Display -->
           <div *ngIf="errorMessage" class="alert alert-danger m-b-20 bo-rad-10 p-t-10 p-b-10 p-l-15 p-r-15" style="color: #721c24; background-color: #f8d7da; border-color: #f5c6cb;">
             <i class="fa fa-exclamation-triangle m-r-10"></i>{{ errorMessage }}
           </div>
-
-
-
-
           <div class="row">
             <div class="col-md-12">
               <!-- Business Name (Signup only) -->

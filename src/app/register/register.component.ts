@@ -68,11 +68,12 @@ export class RegisterComponent {
         lastLogin: new Date(),
         isVerified: false,
         paid: false,
-        trialEndsAt: this.addDays(new Date(), 15),
+        trialEndsAt: this.addDays(new Date(), 14),
         isAdmin: false,
         status: "active",
         currentRestaurantId: "",
         role: "owner",
+        type: this.formData.businessType,
         referralCode: this.formData.referralCode || ""
       };
 
@@ -158,9 +159,17 @@ export class RegisterComponent {
       // Redirect based on isAdmin flag
       const userSnap = await getDoc(userDocRef);
       const userData = userSnap.data() as { isAdmin?: boolean } | undefined;
+      const userType = userSnap.data()?.['type'] as string | undefined;
       if (userData?.isAdmin === true) {
         await this.router.navigate(['/admin']);
-      } else {
+      } else if (userType === 'freelancer') {
+
+                await this.router.navigate(['/freelancer']);
+
+        // handle freelancer route if needed
+      }
+
+      else {
         await this.router.navigate(['/admin-panel', uid]);
       }
 

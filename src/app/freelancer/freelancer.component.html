@@ -1,0 +1,361 @@
+<!-- Bootstrap 5 Container Layer -->
+<div class="container-fluid bg-light min-vh-100 py-5 px-3 px-xl-5">
+
+  <!-- LOADING SKELETON STATE -->
+  <div *ngIf="loading" class="d-flex flex-column align-items-center justify-content-center min-vh-100 text-center">
+    <div class="spinner-border text-primary mb-4" style="width: 4rem; height: 4rem;" role="status"></div>
+    <h4 class="fw-semibold text-dark mb-2">Loading Dashboard</h4>
+    <p class="fs-5 text-muted fw-medium">Assembling your modern SaaS workspace console...</p>
+  </div>
+
+  <!-- ACCESS DENIED ERROR PANELS -->
+  <div *ngIf="!loading && accessDenied" class="row justify-content-center my-5">
+    <div class="col-12 col-md-8 col-xl-6">
+      <div class="card border-0 shadow-xl border-top border-danger border-5 p-5 text-center bg-white">
+        <div class="mx-auto mb-4" style="font-size: 4rem;">🔒</div>
+        <h2 class="h3 text-dark fw-bold mb-3">Security Access Denied</h2>
+        <p class="text-secondary fs-5">Your account context does not hold active permissions to utilize this dashboard panel.</p>
+        <button class="btn btn-outline-primary mt-3">Contact Support</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN FLUID DASHBOARD VIEWS -->
+  <div *ngIf="!loading && isFreelancer && profile" class="row g-4 animate-fade-in">
+
+    <!-- TOP NAV / HEADER -->
+    <div class="col-12">
+      <div class="card border-0 shadow-sm bg-white p-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
+        <div class="d-flex align-items-center gap-3">
+          <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-3 d-flex align-items-center justify-content-center">
+            <span class="fs-3">👋</span>
+          </div>
+          <div>
+            <h1 class="h2 text-dark fw-bold mb-0 tracking-tight">Welcome back, {{ profile.fullName }}</h1>
+            <p class="text-muted mb-0">QR Menu Platform • Referral Distribution Engine</p>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <span class="badge bg-success bg-opacity-10 text-success px-4 py-2 rounded-pill fw-bold text-uppercase tracking-widest fs-6">
+            ACTIVE PARTNER
+          </span>
+          <div class="dropdown">
+            <button class="btn btn-light border shadow-sm dropdown-toggle px-4" type="button" data-bs-toggle="dropdown">
+              <i class="bi bi-person-circle"></i> Profile
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILE & REFERRAL ROW -->
+    <div class="col-12 col-lg-7">
+      <div class="card border-0 shadow-sm p-5 h-100">
+        <div class="d-flex justify-content-between align-items-start mb-5">
+          <div>
+            <h3 class="h4 text-dark fw-bold">Freelancer Profile</h3>
+            <p class="text-muted">Account details &amp; verification status</p>
+          </div>
+          <span class="badge bg-primary px-3 py-2">VERIFIED</span>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-12 col-sm-6">
+            <div class="d-flex align-items-center gap-3 p-4 bg-light rounded-3">
+              <div class="text-primary fs-2">✉️</div>
+              <div class="flex-grow-1">
+                <div class="text-muted small fw-medium">EMAIL ADDRESS</div>
+                <div class="fw-semibold text-dark">{{ profile.email }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="d-flex align-items-center gap-3 p-4 bg-light rounded-3">
+              <div class="text-primary fs-2">📱</div>
+              <div class="flex-grow-1">
+                <div class="text-muted small fw-medium">PHONE</div>
+                <div class="fw-semibold text-dark">{{ profile.phone || 'Not linked' }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="p-4 bg-light rounded-3 d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-muted small fw-medium">ACCOUNT SECURITY KEY</div>
+                <div class="font-monospace fw-bold text-primary">{{ profile.uid }}</div>
+              </div>
+              <button class="btn btn-sm btn-outline-secondary">Copy UID</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-5">
+      <div class="card border-0 shadow-sm p-5 bg-gradient text-white h-100" style="background: linear-gradient(135deg, #1e2937 0%, #334155 100%);">
+        <div class="mb-4">
+          <span class="badge bg-white bg-opacity-25 text-white px-3 py-1 tracking-widest">REFERRAL SYSTEM</span>
+        </div>
+        <h2 class="h3 fw-bold mb-4">YOUR UNIQUE REFERRAL CODE</h2>
+
+        <div class="bg-white bg-opacity-10 backdrop-blur p-4 rounded-4 border border-white border-opacity-20 d-flex flex-column align-items-center mb-5">
+          <span class="h1 font-monospace fw-black tracking-widest text-amber-300 mb-3 lh-1">{{ profile.referralCode }}</span>
+          <button (click)="copyReferralCode()"
+                  [class.btn-success]="copySuccess"
+                  [class.btn-light]="!copySuccess"
+                  class="btn btn-lg fw-bold px-5 py-3 w-100 transition-all shadow">
+            {{ copySuccess ? '✅ COPIED TO CLIPBOARD' : '📋 COPY REFERRAL CODE' }}
+          </button>
+        </div>
+
+        <p class="text-white-50 small mb-0 text-center">Share this code with business owners. Track conversions automatically at checkout.</p>
+      </div>
+    </div>
+
+    <!-- STATISTICS METRICS GRID -->
+    <div class="col-12">
+      <div class="row g-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="card border-0 shadow-sm p-5 h-100 border-start border-5 border-primary">
+            <div class="d-flex justify-content-between">
+              <div>
+                <span class="text-uppercase tracking-widest text-muted small fw-bold">BUSINESSES INVITED</span>
+                <div class="h1 fw-black text-dark mt-2 mb-1">{{ totalInvited }}</div>
+              </div>
+              <div class="fs-1 text-primary opacity-75">📈</div>
+            </div>
+            <div class="text-success small fw-medium">+12 this month</div>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="card border-0 shadow-sm p-5 h-100 border-start border-5 border-success">
+            <div class="d-flex justify-content-between">
+              <div>
+                <span class="text-uppercase tracking-widest text-muted small fw-bold">PAID CUSTOMERS</span>
+                <div class="h1 fw-black text-success mt-2 mb-1">{{ paidCustomersCount }}</div>
+              </div>
+              <div class="fs-1 text-success opacity-75">💰</div>
+            </div>
+            <div class="text-muted small">Successful conversions</div>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="card border-0 shadow-sm p-5 h-100 border-start border-5 border-warning">
+            <div class="d-flex justify-content-between">
+              <div>
+                <span class="text-uppercase tracking-widest text-muted small fw-bold">CONVERSION RATE</span>
+                <div class="h1 fw-black text-warning mt-2 mb-1">{{ conversionRate }}%</div>
+              </div>
+              <div class="fs-1 text-warning opacity-75">🎯</div>
+            </div>
+            <div class="progress mt-3" style="height: 8px;">
+              <div class="progress-bar bg-warning rounded-pill" [style.width.%]="conversionRate"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="card border-0 shadow-sm p-5 h-100 border-start border-5 border-purple">
+            <div class="d-flex justify-content-between">
+              <div>
+                <span class="text-uppercase tracking-widest text-muted small fw-bold">AVAILABLE EARNINGS</span>
+                <div class="h1 fw-black text-purple mt-2 mb-1">{{ availableEarnings }} <span class="fs-4 fw-normal">DT</span></div>
+              </div>
+              <div class="fs-1 text-purple opacity-75">🏦</div>
+            </div>
+            <div class="text-muted small">Ready for withdrawal</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHARTS SECTION -->
+    <div class="col-12">
+      <div class="row g-4">
+        <div class="col-12 col-xl-4">
+          <div class="card border-0 shadow-sm p-5 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div>
+                <h4 class="h5 fw-bold text-dark">Business Distribution</h4>
+                <p class="text-muted small">By category tags</p>
+              </div>
+              <span class="badge bg-light text-dark">LIVE</span>
+            </div>
+            <div class="position-relative style-canvas-container">
+              <canvas #typeChartCanvas></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-xl-4">
+          <div class="card border-0 shadow-sm p-5 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div>
+                <h4 class="h5 fw-bold text-dark">Monthly Volume</h4>
+                <p class="text-muted small">Payments over time</p>
+              </div>
+            </div>
+            <div class="position-relative style-canvas-container">
+              <canvas #monthlyChartCanvas></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-xl-4">
+          <div class="card border-0 shadow-sm p-5 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div>
+                <h4 class="h5 fw-bold text-dark">Earnings Growth</h4>
+                <p class="text-muted small">Yield trends</p>
+              </div>
+            </div>
+            <div class="position-relative style-canvas-container">
+              <canvas #earningsChartCanvas></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BUSINESS LOGS TABLE -->
+    <div class="col-12">
+      <div class="card border-0 shadow-sm overflow-hidden">
+        <div class="card-header bg-white border-0 p-5 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+          <div>
+            <h3 class="h4 fw-bold text-dark mb-1">Managed Accounts Log</h3>
+            <p class="text-muted mb-0">All referred businesses &amp; conversion status</p>
+          </div>
+          <div class="input-group" style="max-width: 420px;">
+            <span class="input-group-text bg-light border-0"><i class="bi bi-search"></i></span>
+            <input
+              type="text"
+              placeholder="Search business, email..."
+              [(ngModel)]="searchTerm"
+              (ngModelChange)="applyFilters()"
+              class="form-control form-control-lg border-0 bg-light shadow-sm"
+            />
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr class="text-uppercase small fw-bold text-muted">
+                <th class="ps-5 py-4">BUSINESS NAME</th>
+                <th class="py-4">EMAIL</th>
+                <th class="py-4">PHONE</th>
+                <th class="py-4">TYPE</th>
+                <th class="py-4">PAID</th>
+                <th class="pe-5 py-4">CREATED</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let biz of paginatedBusinesses" class="border-bottom">
+                <td class="ps-5 py-4 fw-semibold">{{ biz.fullName }}</td>
+                <td class="py-4 text-secondary">{{ biz.email }}</td>
+                <td class="py-4 text-secondary">{{ biz.phone || '-' }}</td>
+                <td class="py-4">
+                  <span class="badge bg-light border text-dark px-3 py-2">{{ biz.type }}</span>
+                </td>
+                <td class="py-4">
+                  <span [class.bg-success]="biz.paid" [class.text-white]="biz.paid" [class.bg-secondary]="!biz.paid" class="badge px-4 py-2 fw-bold">
+                    {{ biz.paid ? 'PAID' : 'PENDING' }}
+                  </span>
+                </td>
+                <td class="pe-5 py-4 text-muted small">{{ formatTimestamp(biz.createdAt) }}</td>
+              </tr>
+              <tr *ngIf="filteredBusinesses.length === 0">
+                <td colspan="6" class="text-center py-5 text-muted">
+                  No results match your search criteria.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card-footer bg-light border-0 p-4 d-flex justify-content-between align-items-center" *ngIf="filteredBusinesses.length > 0">
+          <span class="text-muted">Showing page {{ currentPage }} of {{ totalPages }}</span>
+          <nav>
+            <button class="btn btn-light border me-2" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">← Previous</button>
+            <button class="btn btn-light border" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">Next →</button>
+          </nav>
+        </div>
+      </div>
+    </div>
+
+    <!-- WITHDRAWAL & PAYOUTS -->
+    <div class="col-12 col-xl-6">
+      <div class="card border-0 shadow-sm p-5 h-100">
+        <h3 class="h4 fw-bold mb-5">Withdrawal Parameters</h3>
+
+        <div class="bg-gradient p-5 rounded-4 mb-5 text-white" style="background: linear-gradient(135deg, #3b82f6, #1e40af);">
+          <div class="d-flex justify-content-between align-items-end">
+            <div>
+              <small class="opacity-75 tracking-widest">AVAILABLE BALANCE</small>
+              <h2 class="display-5 fw-black mb-0">{{ availableEarnings }} DT</h2>
+            </div>
+            <div class="text-end">
+              <span class="badge bg-white text-dark">CASH PICKUP</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-5">
+          <p class="fs-5">Reward multiplier: <strong class="text-primary fs-4">{{ commission }} DT</strong> / client</p>
+        </div>
+
+        <div class="alert alert-info border-0 bg-info bg-opacity-10 p-4">
+          <strong>Physical Cash Collection</strong><br>
+          <small>Visit any authorized office for instant payout.</small>
+        </div>
+
+        <div class="mt-5">
+          <h6 class="text-muted fw-bold mb-4">AUTHORIZED HUBS</h6>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex align-items-center gap-3 py-4" *ngFor="let loc of officeLocations">
+              <span class="fs-3">🏢</span>
+              <div>
+                <strong>{{ loc.name }}</strong><br>
+                <span class="text-muted">{{ loc.city }}, Tunisia</span>
+              </div>
+            </li>
+            <li *ngIf="officeLocations.length === 0" class="list-group-item py-4 text-muted">
+              Main Office - Tunis, Tunisia
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-xl-6">
+      <div class="card border-0 shadow-sm p-5 h-100">
+        <h3 class="h4 fw-bold mb-5">Payout Records</h3>
+
+        <div class="overflow-auto" style="max-height: 420px;">
+          <div class="d-flex justify-content-between py-3 border-bottom text-uppercase small fw-bold text-muted sticky-top bg-white">
+            <div class="w-25">DATE</div>
+            <div class="w-25">AMOUNT</div>
+            <div class="w-50 text-end">STATUS</div>
+          </div>
+
+          <div *ngFor="let tx of transactions" class="d-flex justify-content-between py-4 border-bottom align-items-center">
+            <div class="w-25 text-muted">{{ formatTimestamp(tx.createdAt) }}</div>
+            <div class="w-25 fw-bold text-dark">+{{ tx.amount }} DT</div>
+            <div class="w-50 text-end">
+              <span [class]="tx.status === 'paid' ? 'bg-success text-white' : 'bg-primary text-white'" class="badge px-4 py-2 fw-bold text-uppercase">
+                {{ tx.status }}
+              </span>
+            </div>
+          </div>
+
+          <div *ngIf="transactions.length === 0" class="text-center py-8 text-muted">
+            No payouts recorded yet. Earnings will appear here after first conversion.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

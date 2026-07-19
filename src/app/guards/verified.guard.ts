@@ -44,7 +44,7 @@ export const verifiedGuard: CanActivateFn = () => {
           } else {
             createdDate = new Date();
           }
-          trialEndsDate = new Date(createdDate.getTime() + 15 * 24 * 60 * 60 * 1000);
+          trialEndsDate = new Date(createdDate.getTime() + 14 * 24 * 60 * 60 * 1000);
         }
 
         const isTrialActive = new Date().getTime() <= trialEndsDate.getTime();
