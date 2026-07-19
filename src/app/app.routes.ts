@@ -74,7 +74,7 @@ export const routes: Routes = [
     {
         path: 'admin-panel/:id/qr-code',
         component: QrCodeComponent,
-        canActivate: [verifiedGuard]
+       // canActivate: [verifiedGuard]
     },
 
     // ─── Super-admin (must be isAdmin === true) ─────────────────
